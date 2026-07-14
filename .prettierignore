@@ -1,0 +1,7 @@
+dist
+public
+package.json
+package.json.lock
+tsconfig.json
+.vscode
+.env

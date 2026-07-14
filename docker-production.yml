@@ -1,0 +1,21 @@
+services:
+  eps-attendance-api:
+    image: eps/attendance-api
+    container_name: eps-attendance-api
+    build:
+      context: .
+      args:
+        PORT: ${PORT} # Read from .env
+    restart: always
+    expose:
+      - '${PORT}'
+    environment:
+      PORT: ${PORT}
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+    networks:
+      - shared_network
+
+networks:
+  shared_network:
+    external: true

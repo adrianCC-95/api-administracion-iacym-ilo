@@ -1,0 +1,15 @@
+export enum Tables {
+    users = 'users',
+    locations = 'locations',
+    roles = 'roles',
+    biometricDevices = 'biometric_devices',
+    departments = 'departments',
+    offices = 'offices',
+    schedules = 'schedules',
+    shifts = 'shifts',
+    shiftRules = 'shift_rules',
+    activityLog = 'activity_log',
+    employees = 'employees',
+    attendances = 'attendances',
+    invalidAttendances = 'invalid_attendances',
+}

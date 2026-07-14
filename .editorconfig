@@ -1,0 +1,38 @@
+# Editor configuration for all files
+root = true
+
+# Set the indentation style to use spaces (2 spaces per indent)
+[*]
+indent_style = space
+indent_size = 2
+
+# Use Windows-style line endings (CRLF)
+end_of_line = crlf
+
+# Ensure there is a final newline in all files
+insert_final_newline = true
+
+# Trim trailing whitespace
+trim_trailing_whitespace = true
+
+# Define coding style for specific file types
+# JavaScript and TypeScript files
+[*.js]
+indent_style = space
+indent_size = 2
+
+[*.ts]
+indent_style = space
+indent_size = 2
+
+[*.tsx]
+indent_style = space
+indent_size = 2
+
+# Exclude files or directories from formatting
+# (e.g., node_modules, build folders)
+[**/node_modules/**]
+indent_style = space
+
+[**/build/**]
+indent_style = space
