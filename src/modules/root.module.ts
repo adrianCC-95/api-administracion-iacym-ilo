@@ -7,7 +7,20 @@ import { ActivityLogModule } from './activity-log/activity-log.module';
 // import { SocketModule } from './socket/socket.module';
 import { RolesModule } from './roles/roles.module';
 
+import { MembersModule } from './members/members.module';
+import { MinistriesModule } from './ministries/ministries.module';
+import { PositionsModule } from './positions/positions.module';
+
 @Module({
-    imports: [UsersModule, AuthModule, RolesModule, LocationsModule, ActivityLogModule],
+    imports: [
+        UsersModule,
+        AuthModule,
+        RolesModule,
+        LocationsModule,
+        ActivityLogModule,
+        MembersModule,
+        MinistriesModule,
+        PositionsModule,
+    ],
 })
 export class RootModule {}
