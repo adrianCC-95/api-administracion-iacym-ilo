@@ -10,6 +10,11 @@ import { RolesModule } from './roles/roles.module';
 import { MembersModule } from './members/members.module';
 import { MinistriesModule } from './ministries/ministries.module';
 import { PositionsModule } from './positions/positions.module';
+import { FilesModule } from './files/files.module';
+import { StorageModule } from './storage/storage.module';
+import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
+import { IncomeTypesModule } from './income-types/income-types.module';
+import { IncomesModule } from './incomes/incomes.module';
 
 @Module({
     imports: [
@@ -21,6 +26,11 @@ import { PositionsModule } from './positions/positions.module';
         MembersModule,
         MinistriesModule,
         PositionsModule,
+        FilesModule,
+        StorageModule,
+        PaymentMethodsModule,
+        IncomeTypesModule,
+        IncomesModule,
     ],
 })
 export class RootModule {}

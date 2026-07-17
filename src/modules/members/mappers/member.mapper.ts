@@ -5,6 +5,7 @@ import { Member, MemberResponse } from '../models/member.model';
 import { MemberEntity } from '../entities/member.entity';
 import { MinistryMapper } from 'src/modules/ministries/mappers/Ministry.mapper';
 import { PositionMapper } from '../../positions/mappers/position.mapper';
+import { MapperHelper } from 'src/utils/mapper-helper';
 
 export class MemberMapper {
     static toDomain(entity: MemberEntity): Member {
@@ -18,12 +19,11 @@ export class MemberMapper {
         member.phone = entity.phone;
         member.address = entity.address;
         member.ministries = entity.ministries ? entity.ministries.map(MinistryMapper.toDomain) : [];
-        member.location = LocationMapper.toDomain(entity.location);
-        member.position = PositionMapper.toDomain(entity.position);
+        member.location = LocationMapper.toDomain(MapperHelper.require(entity.location, 'Member.location'));
+        member.position = PositionMapper.toDomain(MapperHelper.require(entity.position, 'Member.position'));
         member.createdAt = entity.createdAt;
         member.updatedAt = entity.updatedAt;
         member.deletedAt = entity.deletedAt;
-
         return member;
     }
 

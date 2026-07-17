@@ -6,6 +6,10 @@ export enum Tables {
     members = 'members',
     ministry = 'ministries',
     position = 'positions',
+    incomes = 'incomes',
+    incomeType = 'income_types',
+    paymentMethod = 'payment_methods',
+    files = 'files',
     // otros sin uso
     biometricDevices = 'biometric_devices',
     departments = 'departments',

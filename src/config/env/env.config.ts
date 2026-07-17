@@ -7,6 +7,7 @@ export const envConfig = () =>
             envMode: EnvValidation.envMode('ENV_MODE'),
             apiPrefix: StringValidation.optional('APP_PREFIX'),
             allowedDomains: StringValidation.urls('ALLOWED_DOMAINS'),
+            appUrl: StringValidation.required('APP_URL'),
         },
         allowedDomains: StringValidation.optional('ALLOWED_DOMAINS'),
         database: {
@@ -21,5 +22,11 @@ export const envConfig = () =>
         jwt: {
             secret: StringValidation.required('JWT_SECRET'),
             expTime: StringValidation.required('JWT_EXPIRATION_TIME'),
+        },
+        storage: {
+            maxFileSize: NumberValidation.required('MAX_UPLOAD_SIZE'),
+            storageDriver: StringValidation.required('STORAGE_DRIVER'),
+            storagePath: StringValidation.required('STORAGE_FOLDER_PATH'),
+            publicPath: StringValidation.required('STORAGE_PUBLIC_PATH'),
         },
     });
