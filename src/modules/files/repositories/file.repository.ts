@@ -78,6 +78,14 @@ export class FileRepository implements FileRepositoryImpl {
             throw new CriticalInternalError(error as string);
         }
     }
+
+    async delete(id: File['id']): Promise<void> {
+        try {
+            await this.repository.delete(id);
+        } catch (error) {
+            throw new CriticalInternalError(error as string);
+        }
+    }
     async restore(id: File['id']): Promise<void> {
         try {
             await this.repository.restore(id);

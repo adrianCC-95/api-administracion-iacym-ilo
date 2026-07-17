@@ -11,5 +11,7 @@ export abstract class IncomeRepositoryImpl {
     abstract findByCriteria(criteria: FindIncomeByCriteriaDto): Promise<PaginatedResult<IncomeEntity>>;
     abstract update(id: Income['id'], updateIncomeDto: UpdateIncomeDto): Promise<IncomeEntity>;
     abstract softDelete(id: Income['id']): Promise<void>;
+    abstract findByIdWithDeleted(id: Income['id']): Promise<IncomeEntity | null>;
+    abstract delete(id: Income['id']): Promise<void>;
     abstract restore(id: Income['id']): Promise<void>;
 }

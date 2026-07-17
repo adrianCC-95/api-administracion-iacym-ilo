@@ -46,4 +46,9 @@ export class MembersService {
     async restore(id: Member['id']) {
         return await this.memberRepository.restore(id);
     }
+    async findByIdWithDeleted(id: Member['id']) {
+        const entity = await this.memberRepository.findByIdWithDeleted(id);
+
+        return entity ? MemberMapper.toDomain(entity) : null;
+    }
 }

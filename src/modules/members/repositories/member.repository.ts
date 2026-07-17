@@ -179,4 +179,18 @@ export class MemberRepository implements MemberRepositoryImpl {
             throw new CriticalInternalError(error as string);
         }
     }
+
+    async findByIdWithDeleted(id: Member['id']): Promise<MemberEntity | null> {
+        try {
+            return await this.memberRepository
+                .createQueryBuilder('member')
+                .withDeleted()
+                .leftJoinAndSelect('member.location', 'location')
+                .leftJoinAndSelect('member.position', 'position')
+                .where('member.id = :id', { id })
+                .getOne();
+        } catch (error) {
+            throw new CriticalInternalError(error as string);
+        }
+    }
 }

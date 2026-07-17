@@ -9,29 +9,29 @@ import { PaymentMethod } from './models/payment-method.model';
 
 @Injectable()
 export class PaymentMethodsService {
-    constructor(private readonly rolesRepository: PaymentMethodRepositoryImpl) {}
+    constructor(private readonly paymentMethodsRepository: PaymentMethodRepositoryImpl) {}
 
     async findById(id: PaymentMethod['id']) {
-        const entity = await this.rolesRepository.findById(id);
+        const entity = await this.paymentMethodsRepository.findById(id);
         return entity ? PaymentMethodMapper.toDomain(entity) : null;
     }
 
     async findByCriteria(criteria: FindPaymentMethodByCriteriaDto) {
-        const entities = await this.rolesRepository.findByCriteria(criteria);
+        const entities = await this.paymentMethodsRepository.findByCriteria(criteria);
         return PaymentMethodMapper.toDomainList(entities);
     }
 
     async create(createPaymentMethodDto: CreatePaymentMethodDto) {
-        const existingPaymentMethod = await this.rolesRepository.findByName(createPaymentMethodDto.name);
+        const existingPaymentMethod = await this.paymentMethodsRepository.findByName(createPaymentMethodDto.name);
 
         if (existingPaymentMethod) throw new DuplicateException('role', createPaymentMethodDto.name);
 
-        const newPaymentMethod = await this.rolesRepository.create(createPaymentMethodDto);
+        const newPaymentMethod = await this.paymentMethodsRepository.create(createPaymentMethodDto);
         return PaymentMethodMapper.toDomain(newPaymentMethod);
     }
 
     async update(id: PaymentMethod['id'], updatePaymentMethodDto: UpdatePaymentMethodDto) {
-        const updatedPaymentMethod = await this.rolesRepository.update(id, updatePaymentMethodDto);
+        const updatedPaymentMethod = await this.paymentMethodsRepository.update(id, updatePaymentMethodDto);
         return PaymentMethodMapper.toDomain(updatedPaymentMethod);
     }
 
@@ -40,10 +40,16 @@ export class PaymentMethodsService {
 
         if (!role) throw new DuplicateException('role', id);
 
-        return await this.rolesRepository.softDelete(id);
+        return await this.paymentMethodsRepository.softDelete(id);
     }
 
     async restore(id: PaymentMethod['id']) {
-        return await this.rolesRepository.restore(id);
+        return await this.paymentMethodsRepository.restore(id);
+    }
+
+    async findByIdWithDeleted(id: PaymentMethod['id']) {
+        const entity = await this.paymentMethodsRepository.findByIdWithDeleted(id);
+
+        return entity ? PaymentMethodMapper.toDomain(entity) : null;
     }
 }

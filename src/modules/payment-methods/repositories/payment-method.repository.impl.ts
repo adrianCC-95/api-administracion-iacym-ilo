@@ -15,5 +15,6 @@ export abstract class PaymentMethodRepositoryImpl {
         updatePaymentMethodDto: UpdatePaymentMethodDto,
     ): Promise<PaymentMethodEntity>;
     abstract softDelete(id: PaymentMethod['id']): Promise<void>;
+    abstract findByIdWithDeleted(id: PaymentMethod['id']): Promise<PaymentMethodEntity | null>;
     abstract restore(id: PaymentMethod['id']): Promise<void>;
 }

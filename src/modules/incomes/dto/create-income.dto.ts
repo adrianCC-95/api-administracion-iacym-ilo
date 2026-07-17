@@ -4,12 +4,15 @@ import { IsDateString, IsNumber, IsOptional, IsString, MaxLength, Min } from 'cl
 import { IsId } from 'src/common/decorators/is-id';
 
 export class CreateIncomeDto {
+    @Type(() => Number)
     @IsId()
     memberId!: number;
 
+    @Type(() => Number)
     @IsId()
     incomeTypeId!: number;
 
+    @Type(() => Number)
     @IsId()
     paymentMethodId!: number;
 
@@ -22,8 +25,9 @@ export class CreateIncomeDto {
     incomeDate!: Date;
 
     @IsOptional()
+    @Type(() => Number)
     @IsId()
-    voucherFileId?: number | null;
+    voucherFileId?: number | null; // en actualizar es opcional tambien, en caso que exista se reemplaza
 
     @IsOptional()
     @IsString()

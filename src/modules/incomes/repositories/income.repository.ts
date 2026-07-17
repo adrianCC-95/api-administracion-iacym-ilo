@@ -125,15 +125,79 @@ export class IncomeRepository implements IncomeRepositoryImpl {
             throw new CriticalInternalError(error as string);
         }
     }
-
     async update(id: Income['id'], updateIncomeDto: UpdateIncomeDto): Promise<IncomeEntity> {
         try {
-            const updated = await this.incomeRepository.save({ id, ...updateIncomeDto });
-            return (await this.findById(updated.id)) as IncomeEntity;
+            const income = await this.incomeRepository.findOne({
+                where: { id },
+            });
+
+            if (!income) {
+                throw new Error('Income not found');
+            }
+
+            const data: Partial<IncomeEntity> = {
+                id,
+            };
+
+            if (updateIncomeDto.amount !== undefined) {
+                data.amount = updateIncomeDto.amount;
+            }
+
+            if (updateIncomeDto.incomeDate !== undefined) {
+                data.incomeDate = updateIncomeDto.incomeDate;
+            }
+
+            if (updateIncomeDto.referenceNumber !== undefined) {
+                data.referenceNumber = updateIncomeDto.referenceNumber;
+            }
+
+            if (updateIncomeDto.observation !== undefined) {
+                data.observation = updateIncomeDto.observation;
+            }
+
+            if (updateIncomeDto.memberId !== undefined) {
+                data.member = {
+                    id: updateIncomeDto.memberId,
+                } as MemberEntity;
+            }
+
+            if (updateIncomeDto.incomeTypeId !== undefined) {
+                data.incomeType = {
+                    id: updateIncomeDto.incomeTypeId,
+                } as IncomeTypeEntity;
+            }
+
+            if (updateIncomeDto.paymentMethodId !== undefined) {
+                data.paymentMethod = {
+                    id: updateIncomeDto.paymentMethodId,
+                } as PaymentMethodEntity;
+            }
+
+            if (updateIncomeDto.voucherFileId !== undefined) {
+                data.voucherFile = updateIncomeDto.voucherFileId
+                    ? ({
+                          id: updateIncomeDto.voucherFileId,
+                      } as FileEntity)
+                    : null;
+            }
+
+            await this.incomeRepository.save(data);
+
+            return (await this.findById(id)) as IncomeEntity;
         } catch (error) {
             throw new CriticalInternalError(error as string);
         }
     }
+
+    // async update(id: Income['id'], updateIncomeDto: UpdateIncomeDto): Promise<IncomeEntity> {
+    //     try {
+    //         console.log('repository incomes update', updateIncomeDto);
+    //         const updated = await this.incomeRepository.save({ id, ...updateIncomeDto });
+    //         return (await this.findById(updated.id)) as IncomeEntity;
+    //     } catch (error) {
+    //         throw new CriticalInternalError(error as string);
+    //     }
+    // }
 
     async softDelete(id: Income['id']): Promise<void> {
         try {
@@ -142,9 +206,37 @@ export class IncomeRepository implements IncomeRepositoryImpl {
             throw new CriticalInternalError(error as string);
         }
     }
+
+    async delete(id: Income['id']): Promise<void> {
+        try {
+            await this.incomeRepository.delete(id);
+        } catch (error) {
+            throw new CriticalInternalError(error as string);
+        }
+    }
     async restore(id: Income['id']): Promise<void> {
         try {
             await this.incomeRepository.restore(id);
+        } catch (error) {
+            throw new CriticalInternalError(error as string);
+        }
+    }
+    async findByIdWithDeleted(id: Income['id']): Promise<IncomeEntity | null> {
+        try {
+            return await this.incomeRepository
+                .createQueryBuilder('income')
+                .withDeleted()
+
+                .leftJoinAndSelect('income.voucherFile', 'voucherFile')
+
+                .leftJoinAndSelect('income.member', 'member')
+
+                .leftJoinAndSelect('income.incomeType', 'incomeType')
+
+                .leftJoinAndSelect('income.paymentMethod', 'paymentMethod')
+
+                .where('income.id = :id', { id })
+                .getOne();
         } catch (error) {
             throw new CriticalInternalError(error as string);
         }

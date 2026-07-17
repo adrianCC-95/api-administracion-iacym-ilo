@@ -13,11 +13,16 @@ import { CriticalInternalError } from '../../../common/exceptions/critical-inter
 
 @Injectable()
 export class IncomeTypeRepository implements IncomeTypeRepositoryImpl {
-    constructor(@InjectRepository(IncomeTypeEntity) private readonly roleRepository: Repository<IncomeTypeEntity>) {}
+    constructor(
+        @InjectRepository(IncomeTypeEntity) private readonly incomeTypeRepository: Repository<IncomeTypeEntity>,
+    ) {}
 
     async findById(id: IncomeType['id']): Promise<IncomeTypeEntity | null> {
         try {
-            return await this.roleRepository.createQueryBuilder('role').where('role.id = :id', { id }).getOne();
+            return await this.incomeTypeRepository
+                .createQueryBuilder('incomeType')
+                .where('incomeType.id = :id', { id })
+                .getOne();
         } catch (error) {
             throw new CriticalInternalError(error);
         }
@@ -25,9 +30,9 @@ export class IncomeTypeRepository implements IncomeTypeRepositoryImpl {
 
     async findByName(name: string): Promise<IncomeTypeEntity | null> {
         try {
-            return await this.roleRepository
-                .createQueryBuilder('role')
-                .where('role.name = :name', { name })
+            return await this.incomeTypeRepository
+                .createQueryBuilder('incomeType')
+                .where('incomeType.name = :name', { name })
                 .withDeleted()
                 .getOne();
         } catch (error) {
@@ -37,16 +42,16 @@ export class IncomeTypeRepository implements IncomeTypeRepositoryImpl {
 
     async findByCriteria(criteria: FindIncomeTypeByCriteriaDto): Promise<PaginatedResult<IncomeTypeEntity>> {
         try {
-            const qb = this.roleRepository.createQueryBuilder('role');
+            const qb = this.incomeTypeRepository.createQueryBuilder('incomeType');
 
             if (criteria.name) {
-                qb.andWhere('role.name LIKE :name', { name: `%${criteria.name}%` });
+                qb.andWhere('incomeType.name LIKE :name', { name: `%${criteria.name}%` });
             }
 
             if (criteria.status) {
-                Query.applyStatusFilter(qb, 'role', criteria.status);
+                Query.applyStatusFilter(qb, 'incomeType', criteria.status);
             }
-            Query.sortCriteria(qb, `role.${criteria.sortField}`, criteria.sortDirection);
+            Query.sortCriteria(qb, `incomeType.${criteria.sortField}`, criteria.sortDirection);
 
             return Query.fetchPaged(qb, criteria.page, criteria.size);
         } catch (error) {
@@ -56,7 +61,7 @@ export class IncomeTypeRepository implements IncomeTypeRepositoryImpl {
 
     async create(createIncomeTypeDto: CreateIncomeTypeDto): Promise<IncomeTypeEntity> {
         try {
-            return await this.roleRepository.save(createIncomeTypeDto);
+            return await this.incomeTypeRepository.save(createIncomeTypeDto);
         } catch (error) {
             throw new CriticalInternalError(error);
         }
@@ -64,7 +69,7 @@ export class IncomeTypeRepository implements IncomeTypeRepositoryImpl {
 
     async update(id: IncomeType['id'], updateIncomeTypeDto: UpdateIncomeTypeDto): Promise<IncomeTypeEntity> {
         try {
-            const updated = await this.roleRepository.save({ id, ...updateIncomeTypeDto });
+            const updated = await this.incomeTypeRepository.save({ id, ...updateIncomeTypeDto });
             return (await this.findById(updated.id)) as IncomeTypeEntity;
         } catch (error) {
             throw new CriticalInternalError(error);
@@ -73,16 +78,23 @@ export class IncomeTypeRepository implements IncomeTypeRepositoryImpl {
 
     async softDelete(id: IncomeType['id']): Promise<void> {
         try {
-            await this.roleRepository.softDelete(id);
+            await this.incomeTypeRepository.softDelete(id);
         } catch (error) {
             throw new CriticalInternalError(error);
         }
     }
     async restore(id: IncomeType['id']): Promise<void> {
         try {
-            await this.roleRepository.restore(id);
+            await this.incomeTypeRepository.restore(id);
         } catch (error) {
             throw new CriticalInternalError(error);
         }
+    }
+    async findByIdWithDeleted(id: IncomeType['id']) {
+        return await this.incomeTypeRepository
+            .createQueryBuilder('incomeType')
+            .withDeleted()
+            .where('incomeType.id = :id', { id })
+            .getOne();
     }
 }

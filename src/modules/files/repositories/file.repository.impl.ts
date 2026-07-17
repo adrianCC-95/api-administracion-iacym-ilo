@@ -16,5 +16,7 @@ export abstract class FileRepositoryImpl {
 
     abstract softDelete(id: File['id']): Promise<void>;
 
+    abstract delete(id: File['id']): Promise<void>;
+
     abstract restore(id: File['id']): Promise<void>;
 }

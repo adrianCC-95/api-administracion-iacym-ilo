@@ -9,29 +9,29 @@ import { IncomeType } from './models/income-type.model';
 
 @Injectable()
 export class IncomeTypesService {
-    constructor(private readonly rolesRepository: IncomeTypeRepositoryImpl) {}
+    constructor(private readonly incomeTypesRepository: IncomeTypeRepositoryImpl) {}
 
     async findById(id: IncomeType['id']) {
-        const entity = await this.rolesRepository.findById(id);
+        const entity = await this.incomeTypesRepository.findById(id);
         return entity ? IncomeTypeMapper.toDomain(entity) : null;
     }
 
     async findByCriteria(criteria: FindIncomeTypeByCriteriaDto) {
-        const entities = await this.rolesRepository.findByCriteria(criteria);
+        const entities = await this.incomeTypesRepository.findByCriteria(criteria);
         return IncomeTypeMapper.toDomainList(entities);
     }
 
     async create(createIncomeTypeDto: CreateIncomeTypeDto) {
-        const existingIncomeType = await this.rolesRepository.findByName(createIncomeTypeDto.name);
+        const existingIncomeType = await this.incomeTypesRepository.findByName(createIncomeTypeDto.name);
 
         if (existingIncomeType) throw new DuplicateException('role', createIncomeTypeDto.name);
 
-        const newIncomeType = await this.rolesRepository.create(createIncomeTypeDto);
+        const newIncomeType = await this.incomeTypesRepository.create(createIncomeTypeDto);
         return IncomeTypeMapper.toDomain(newIncomeType);
     }
 
     async update(id: IncomeType['id'], updateIncomeTypeDto: UpdateIncomeTypeDto) {
-        const updatedIncomeType = await this.rolesRepository.update(id, updateIncomeTypeDto);
+        const updatedIncomeType = await this.incomeTypesRepository.update(id, updateIncomeTypeDto);
         return IncomeTypeMapper.toDomain(updatedIncomeType);
     }
 
@@ -40,10 +40,16 @@ export class IncomeTypesService {
 
         if (!role) throw new DuplicateException('role', id);
 
-        return await this.rolesRepository.softDelete(id);
+        return await this.incomeTypesRepository.softDelete(id);
     }
 
     async restore(id: IncomeType['id']) {
-        return await this.rolesRepository.restore(id);
+        return await this.incomeTypesRepository.restore(id);
+    }
+
+    async findByIdWithDeleted(id: IncomeType['id']) {
+        const entity = await this.incomeTypesRepository.findByIdWithDeleted(id);
+
+        return entity ? IncomeTypeMapper.toDomain(entity) : null;
     }
 }

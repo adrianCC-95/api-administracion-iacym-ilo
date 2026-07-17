@@ -6,6 +6,7 @@ import { FindFileByCriteriaDto } from './dto/find-file-by-criteria';
 import { DuplicateException } from '../../common/exceptions/duplicate-exception';
 import { FileMapper } from './mappers/file.mapper';
 import { File } from './models/file.model';
+import { ResourceNotFoundException } from 'src/common/exceptions/not-found-exception';
 
 @Injectable()
 export class FilesService {
@@ -37,6 +38,16 @@ export class FilesService {
         if (!file) throw new DuplicateException('file', id);
 
         return await this.filesRepository.softDelete(id);
+    }
+
+    async delete(id: File['id']) {
+        const file = await this.findById(id);
+
+        if (!file) {
+            throw new ResourceNotFoundException('File', id);
+        }
+
+        await this.filesRepository.delete(id);
     }
 
     async restore(id: File['id']) {

@@ -51,7 +51,7 @@ export class IncomesController {
     @UseInterceptors(FileInterceptor('voucher'))
     async create(
         @CurrentUser() user: any,
-        @UploadedFile() voucher: Express.Multer.File,
+        @UploadedFile() voucher: Express.Multer.File | undefined,
         @Body() createIncomeDto: CreateIncomeDto,
     ) {
         const income = await this.incomesService.create(createIncomeDto, voucher, user.id);
@@ -62,8 +62,13 @@ export class IncomesController {
     @RequireAuth()
     @HttpCode(HttpStatus.OK)
     @Put(':id')
-    async update(@Param('id', IsIdPipe) id: number, @Body() updateIncomeDto: UpdateIncomeDto) {
-        const income = await this.incomesService.update(id, updateIncomeDto);
+    @UseInterceptors(FileInterceptor('voucher'))
+    async update(
+        @UploadedFile() voucher: Express.Multer.File | undefined,
+        @Param('id', IsIdPipe) id: number,
+        @Body() updateIncomeDto: UpdateIncomeDto,
+    ) {
+        const income = await this.incomesService.update(id, voucher, updateIncomeDto);
         return IncomeMapper.toResponse(income);
     }
 
@@ -73,6 +78,13 @@ export class IncomesController {
     async remove(@Param('id', IsIdPipe) id: number) {
         return await this.incomesService.softDelete(id);
     }
+
+    // @RequireAuth()
+    // @HttpCode(HttpStatus.OK)
+    // @Delete(':id')
+    // async delete(@Param('id', IsIdPipe) id: number) {
+    //     return this.incomesService.delete(id);
+    // }
 
     @RequireAuth()
     @HttpCode(HttpStatus.OK)

@@ -14,12 +14,16 @@ import { CriticalInternalError } from '../../../common/exceptions/critical-inter
 @Injectable()
 export class PaymentMethodRepository implements PaymentMethodRepositoryImpl {
     constructor(
-        @InjectRepository(PaymentMethodEntity) private readonly roleRepository: Repository<PaymentMethodEntity>,
+        @InjectRepository(PaymentMethodEntity)
+        private readonly paymentMethodRepository: Repository<PaymentMethodEntity>,
     ) {}
 
     async findById(id: PaymentMethod['id']): Promise<PaymentMethodEntity | null> {
         try {
-            return await this.roleRepository.createQueryBuilder('role').where('role.id = :id', { id }).getOne();
+            return await this.paymentMethodRepository
+                .createQueryBuilder('paymentMethod')
+                .where('paymentMethod.id = :id', { id })
+                .getOne();
         } catch (error) {
             throw new CriticalInternalError(error as string);
         }
@@ -27,9 +31,9 @@ export class PaymentMethodRepository implements PaymentMethodRepositoryImpl {
 
     async findByName(name: string): Promise<PaymentMethodEntity | null> {
         try {
-            return await this.roleRepository
-                .createQueryBuilder('role')
-                .where('role.name = :name', { name })
+            return await this.paymentMethodRepository
+                .createQueryBuilder('paymentMethod')
+                .where('paymentMethod.name = :name', { name })
                 .withDeleted()
                 .getOne();
         } catch (error) {
@@ -39,16 +43,16 @@ export class PaymentMethodRepository implements PaymentMethodRepositoryImpl {
 
     async findByCriteria(criteria: FindPaymentMethodByCriteriaDto): Promise<PaginatedResult<PaymentMethodEntity>> {
         try {
-            const qb = this.roleRepository.createQueryBuilder('role');
+            const qb = this.paymentMethodRepository.createQueryBuilder('paymentMethod');
 
             if (criteria.name) {
-                qb.andWhere('role.name LIKE :name', { name: `%${criteria.name}%` });
+                qb.andWhere('paymentMethod.name LIKE :name', { name: `%${criteria.name}%` });
             }
 
             if (criteria.status) {
-                Query.applyStatusFilter(qb, 'role', criteria.status);
+                Query.applyStatusFilter(qb, 'paymentMethod', criteria.status);
             }
-            Query.sortCriteria(qb, `role.${criteria.sortField}`, criteria.sortDirection);
+            Query.sortCriteria(qb, `paymentMethod.${criteria.sortField}`, criteria.sortDirection);
 
             return Query.fetchPaged(qb, criteria.page, criteria.size);
         } catch (error) {
@@ -58,7 +62,7 @@ export class PaymentMethodRepository implements PaymentMethodRepositoryImpl {
 
     async create(createPaymentMethodDto: CreatePaymentMethodDto): Promise<PaymentMethodEntity> {
         try {
-            return await this.roleRepository.save(createPaymentMethodDto);
+            return await this.paymentMethodRepository.save(createPaymentMethodDto);
         } catch (error) {
             throw new CriticalInternalError(error as string);
         }
@@ -69,7 +73,7 @@ export class PaymentMethodRepository implements PaymentMethodRepositoryImpl {
         updatePaymentMethodDto: UpdatePaymentMethodDto,
     ): Promise<PaymentMethodEntity> {
         try {
-            const updated = await this.roleRepository.save({ id, ...updatePaymentMethodDto });
+            const updated = await this.paymentMethodRepository.save({ id, ...updatePaymentMethodDto });
             return (await this.findById(updated.id)) as PaymentMethodEntity;
         } catch (error) {
             throw new CriticalInternalError(error as string);
@@ -78,16 +82,24 @@ export class PaymentMethodRepository implements PaymentMethodRepositoryImpl {
 
     async softDelete(id: PaymentMethod['id']): Promise<void> {
         try {
-            await this.roleRepository.softDelete(id);
+            await this.paymentMethodRepository.softDelete(id);
         } catch (error) {
             throw new CriticalInternalError(error as string);
         }
     }
     async restore(id: PaymentMethod['id']): Promise<void> {
         try {
-            await this.roleRepository.restore(id);
+            await this.paymentMethodRepository.restore(id);
         } catch (error) {
             throw new CriticalInternalError(error as string);
         }
+    }
+
+    async findByIdWithDeleted(id: PaymentMethod['id']) {
+        return await this.paymentMethodRepository
+            .createQueryBuilder('paymentMethod')
+            .withDeleted()
+            .where('paymentMethod.id = :id', { id })
+            .getOne();
     }
 }

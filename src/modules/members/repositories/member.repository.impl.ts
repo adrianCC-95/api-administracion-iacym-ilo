@@ -12,5 +12,6 @@ export abstract class MemberRepositoryImpl {
     abstract findByCriteria(criteria: FindMemberByCriteriaDto): Promise<PaginatedResult<MemberEntity>>;
     abstract update(id: Member['id'], updateMemberDto: UpdateMemberDto): Promise<MemberEntity>;
     abstract softDelete(id: Member['id']): Promise<void>;
+    abstract findByIdWithDeleted(id: Member['id']): Promise<MemberEntity | null>;
     abstract restore(id: Member['id']): Promise<void>;
 }

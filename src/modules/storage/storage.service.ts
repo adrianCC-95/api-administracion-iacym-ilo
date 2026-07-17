@@ -67,4 +67,12 @@ export class StorageService {
             throw error;
         }
     }
+
+    async delete(relativePath: string): Promise<void> {
+        const fullPath = path.join(process.cwd(), this.getBasePath(), relativePath);
+
+        if (fs.existsSync(fullPath)) {
+            await fs.promises.unlink(fullPath);
+        }
+    }
 }
