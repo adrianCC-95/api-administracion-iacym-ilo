@@ -15,6 +15,7 @@ import { StorageModule } from './storage/storage.module';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { IncomeTypesModule } from './income-types/income-types.module';
 import { IncomesModule } from './incomes/incomes.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
     imports: [
@@ -31,6 +32,7 @@ import { IncomesModule } from './incomes/incomes.module';
         PaymentMethodsModule,
         IncomeTypesModule,
         IncomesModule,
+        ReportsModule,
     ],
 })
 export class RootModule {}

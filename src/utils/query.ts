@@ -37,4 +37,25 @@ export class Query {
             qb.withDeleted();
         }
     }
+
+    static async fetchPagedRaw<T>(
+        qb: SelectQueryBuilder<any>,
+        page: Pagination['page'] | undefined = 1,
+        size: Pagination['size'] | undefined = 10,
+    ): Promise<PaginatedResult<T>> {
+        const offset = (page - 1) * size;
+
+        const countQuery = qb.clone();
+
+        const total = (await countQuery.getRawMany()).length;
+
+        const data = await qb.offset(offset).limit(size).getRawMany<T>();
+
+        const pageInfo = PaginationBuilder.pageInfo(total, page, size);
+
+        return {
+            pageInfo,
+            items: data,
+        };
+    }
 }
