@@ -51,4 +51,8 @@ export class MembersService {
 
         return entity ? MemberMapper.toDomain(entity) : null;
     }
+
+    async count(): Promise<number> {
+        return this.memberRepository.count();
+    }
 }

@@ -16,6 +16,7 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { IncomeTypesModule } from './income-types/income-types.module';
 import { IncomesModule } from './incomes/incomes.module';
 import { ReportsModule } from './reports/reports.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { ReportsModule } from './reports/reports.module';
         IncomeTypesModule,
         IncomesModule,
         ReportsModule,
+        DashboardModule,
     ],
 })
 export class RootModule {}

@@ -193,4 +193,7 @@ export class MemberRepository implements MemberRepositoryImpl {
             throw new CriticalInternalError(error as string);
         }
     }
+    async count(): Promise<number> {
+        return this.memberRepository.count();
+    }
 }

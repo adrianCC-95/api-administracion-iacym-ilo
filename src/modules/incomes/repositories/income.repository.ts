@@ -62,11 +62,47 @@ export class IncomeRepository implements IncomeRepositoryImpl {
 
                 .leftJoinAndSelect('member.position', 'position')
 
-                .leftJoinAndSelect('member.ministries', 'ministries')
+                // .leftJoinAndSelect('member.ministries', 'ministries')
 
                 .leftJoinAndSelect('income.registeredBy', 'registeredBy')
                 .leftJoinAndSelect('registeredBy.location', 'registeredByLocation')
                 .leftJoinAndSelect('registeredBy.role', 'registeredByRole');
+
+            if (criteria.memberId) {
+                qb.andWhere('member.id = :memberId', {
+                    memberId: criteria.memberId,
+                });
+            }
+
+            if (criteria.incomeTypeId) {
+                qb.andWhere('incomeType.id = :incomeTypeId', {
+                    incomeTypeId: criteria.incomeTypeId,
+                });
+            }
+
+            if (criteria.paymentMethodId) {
+                qb.andWhere('paymentMethod.id = :paymentMethodId', {
+                    paymentMethodId: criteria.paymentMethodId,
+                });
+            }
+
+            if (criteria.registeredBy) {
+                qb.andWhere('registeredBy.id = :registeredBy', {
+                    registeredBy: criteria.registeredBy,
+                });
+            }
+
+            if (criteria.dateFrom) {
+                qb.andWhere('income.incomeDate >= :dateFrom', {
+                    dateFrom: criteria.dateFrom,
+                });
+            }
+
+            if (criteria.dateTo) {
+                qb.andWhere('income.incomeDate <= :dateTo', {
+                    dateTo: criteria.dateTo,
+                });
+            }
 
             // if (criteria.name) {
             //     qb.andWhere('income.name LIKE :name', { name: `%${criteria.name}%` });

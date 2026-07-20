@@ -14,4 +14,5 @@ export abstract class MemberRepositoryImpl {
     abstract softDelete(id: Member['id']): Promise<void>;
     abstract findByIdWithDeleted(id: Member['id']): Promise<MemberEntity | null>;
     abstract restore(id: Member['id']): Promise<void>;
+    abstract count(): Promise<number>;
 }
