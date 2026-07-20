@@ -10,9 +10,11 @@ import {
     Post,
     Put,
     Query,
+    Res,
     UploadedFile,
     UseInterceptors,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { IncomesService } from './incomes.service';
@@ -23,6 +25,7 @@ import { ResourceNotFoundException } from '../../common/exceptions/not-found-exc
 import { RequireAuth } from '../../common/decorators/require-auth';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ExportIncomeCriteriaDto } from './dto/export-income-criteria.dto';
 
 @Controller('incomes')
 export class IncomesController {
@@ -34,6 +37,13 @@ export class IncomesController {
     async findByCriteria(@Query() query: FindIncomeByCriteriaDto) {
         const incomes = await this.incomesService.findByCriteria(query);
         return IncomeMapper.toResponseList(incomes);
+    }
+
+    @RequireAuth()
+    @HttpCode(HttpStatus.OK)
+    @Get('export')
+    async export(@Query() query: ExportIncomeCriteriaDto, @Res() res: Response) {
+        await this.incomesService.export(query, res);
     }
 
     @RequireAuth()

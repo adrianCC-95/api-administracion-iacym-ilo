@@ -15,6 +15,7 @@ import { IncomeTypeEntity } from '../../income-types/entities/income-type.entity
 import { PaymentMethodEntity } from '../../payment-methods/entities/payment-method.entity';
 import { FileEntity } from '../../files/entities/file.entity';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
+import { ExportIncomeCriteriaDto } from '../dto/export-income-criteria.dto';
 
 @Injectable()
 export class IncomeRepository implements IncomeRepositoryImpl {
@@ -273,6 +274,59 @@ export class IncomeRepository implements IncomeRepositoryImpl {
 
                 .where('income.id = :id', { id })
                 .getOne();
+        } catch (error) {
+            throw new CriticalInternalError(error as string);
+        }
+    }
+
+    async exportByCriteria(criteria: ExportIncomeCriteriaDto): Promise<IncomeEntity[]> {
+        try {
+            const qb = this.incomeRepository
+                .createQueryBuilder('income')
+                .leftJoinAndSelect('income.member', 'member')
+                .leftJoinAndSelect('income.incomeType', 'incomeType')
+                .leftJoinAndSelect('income.paymentMethod', 'paymentMethod')
+                .leftJoinAndSelect('income.voucherFile', 'voucherFile')
+                .leftJoinAndSelect('member.location', 'location')
+                .leftJoinAndSelect('member.position', 'position')
+                .leftJoinAndSelect('income.registeredBy', 'registeredBy')
+                .leftJoinAndSelect('registeredBy.location', 'registeredByLocation')
+                .leftJoinAndSelect('registeredBy.role', 'registeredByRole');
+
+            if (criteria.memberId) {
+                qb.andWhere('member.id = :memberId', { memberId: criteria.memberId });
+            }
+
+            if (criteria.incomeTypeId) {
+                qb.andWhere('incomeType.id = :incomeTypeId', { incomeTypeId: criteria.incomeTypeId });
+            }
+
+            if (criteria.paymentMethodId) {
+                qb.andWhere('paymentMethod.id = :paymentMethodId', { paymentMethodId: criteria.paymentMethodId });
+            }
+
+            if (criteria.registeredBy) {
+                qb.andWhere('registeredBy.id = :registeredBy', { registeredBy: criteria.registeredBy });
+            }
+
+            if (criteria.dateFrom) {
+                qb.andWhere('income.incomeDate >= :dateFrom', { dateFrom: criteria.dateFrom });
+            }
+
+            if (criteria.dateTo) {
+                qb.andWhere('income.incomeDate <= :dateTo', { dateTo: criteria.dateTo });
+            }
+
+            if (criteria.status) {
+                Query.applyStatusFilter(qb, 'income', criteria.status);
+            }
+
+            const sortField = criteria.sortField || 'createdAt';
+            const sortDirection = criteria.sortDirection || 'DESC';
+            Query.sortCriteria(qb, `income.${sortField}`, sortDirection);
+
+            // Sin paginación: trae todos los registros que cumplen los filtros
+            return await qb.getMany();
         } catch (error) {
             throw new CriticalInternalError(error as string);
         }

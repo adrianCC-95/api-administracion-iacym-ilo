@@ -7,6 +7,7 @@ import { IncomeTypesModule } from '../income-types/income-types.module';
 import { PaymentMethodsModule } from '../payment-methods/payment-methods.module';
 import { FilesModule } from '../files/files.module';
 import { StorageModule } from '../storage/storage.module';
+import { IncomeExcelService } from './services/income-excel.service';
 
 @Module({
     imports: [
@@ -18,7 +19,7 @@ import { StorageModule } from '../storage/storage.module';
         StorageModule,
     ],
     controllers: [IncomesController],
-    providers: [IncomesService],
+    providers: [IncomesService, IncomeExcelService],
     exports: [IncomesService],
 })
 export class IncomesModule {}

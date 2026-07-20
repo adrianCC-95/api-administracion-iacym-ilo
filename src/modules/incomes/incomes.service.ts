@@ -1,10 +1,10 @@
 import { StorageService } from './../storage/storage.service';
 import { Injectable } from '@nestjs/common';
+import { Response } from 'express';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { IncomeRepositoryImpl } from './repositories/income.repository.impl';
 import { FindIncomeByCriteriaDto } from './dto/find-income-by-criteria';
-import { DuplicateException } from '../../common/exceptions/duplicate-exception';
 import { ResourceNotFoundException } from '../../common/exceptions/not-found-exception';
 import { IncomeMapper } from './mappers/income.mapper';
 import { Income } from './models/income.model';
@@ -13,6 +13,8 @@ import { IncomeTypesService } from '../income-types/income-types.service';
 import { PaymentMethodsService } from '../payment-methods/payment-methods.service';
 import { FilesService } from '../files/files.service';
 import { StorageFolder } from '../storage/enums/storage-folder.enum';
+import { IncomeExcelService } from './services/income-excel.service';
+import { ExportIncomeCriteriaDto } from './dto/export-income-criteria.dto';
 
 @Injectable()
 export class IncomesService {
@@ -23,6 +25,7 @@ export class IncomesService {
         private readonly paymentMethodsService: PaymentMethodsService,
         private readonly filesService: FilesService,
         private readonly storageService: StorageService,
+        private readonly incomeExcelService: IncomeExcelService,
     ) {}
 
     async findById(id: Income['id']) {
@@ -234,5 +237,11 @@ export class IncomesService {
         return {
             message: 'Income restaurado correctamente',
         };
+    }
+    async export(criteria: ExportIncomeCriteriaDto, res: Response): Promise<void> {
+        const entities = await this.incomesRepository.exportByCriteria(criteria);
+        const incomes = entities.map((entity) => IncomeMapper.toDomain(entity));
+
+        await this.incomeExcelService.generateExcelResponse(incomes, criteria, res);
     }
 }

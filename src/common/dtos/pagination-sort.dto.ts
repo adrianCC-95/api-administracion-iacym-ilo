@@ -23,5 +23,5 @@ export class PaginationSortDto {
 
     @IsOptional()
     @IsIn(['ASC', 'DESC'])
-    sortDirection?: SortDirection = 'ASC';
+    sortDirection?: SortDirection = 'DESC';
 }
