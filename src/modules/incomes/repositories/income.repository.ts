@@ -105,10 +105,6 @@ export class IncomeRepository implements IncomeRepositoryImpl {
                 });
             }
 
-            // if (criteria.name) {
-            //     qb.andWhere('income.name LIKE :name', { name: `%${criteria.name}%` });
-            // }
-
             if (criteria.status) {
                 Query.applyStatusFilter(qb, 'income', criteria.status);
             }
@@ -225,16 +221,6 @@ export class IncomeRepository implements IncomeRepositoryImpl {
             throw new CriticalInternalError(error as string);
         }
     }
-
-    // async update(id: Income['id'], updateIncomeDto: UpdateIncomeDto): Promise<IncomeEntity> {
-    //     try {
-    //         console.log('repository incomes update', updateIncomeDto);
-    //         const updated = await this.incomeRepository.save({ id, ...updateIncomeDto });
-    //         return (await this.findById(updated.id)) as IncomeEntity;
-    //     } catch (error) {
-    //         throw new CriticalInternalError(error as string);
-    //     }
-    // }
 
     async softDelete(id: Income['id']): Promise<void> {
         try {

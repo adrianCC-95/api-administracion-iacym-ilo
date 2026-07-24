@@ -1,5 +1,6 @@
 import { PaginatedResult } from '../../../types/pagination';
 import { CreateMemberDto } from '../dto/create-member.dto';
+import { ExportMemberCriteriaDto } from '../dto/export-member-criteria.dto';
 import { FindMemberByCriteriaDto } from '../dto/find-member-by-criteria';
 import { UpdateMemberDto } from '../dto/update-member.dto';
 import { MemberEntity } from '../entities/member.entity';
@@ -15,4 +16,5 @@ export abstract class MemberRepositoryImpl {
     abstract findByIdWithDeleted(id: Member['id']): Promise<MemberEntity | null>;
     abstract restore(id: Member['id']): Promise<void>;
     abstract count(): Promise<number>;
+    abstract exportByCriteria(criteria: ExportMemberCriteriaDto): Promise<MemberEntity[]>;
 }

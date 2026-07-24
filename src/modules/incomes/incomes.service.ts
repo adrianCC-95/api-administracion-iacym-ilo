@@ -120,38 +120,6 @@ export class IncomesService {
 
         return IncomeMapper.toDomain(updatedIncome);
     }
-    // async update(id: Income['id'], voucher: Express.Multer.File | undefined, updateIncomeDto: UpdateIncomeDto) {
-    //     console.log(updateIncomeDto);
-    //     // valida la existencia de miembro
-    //     const member = await this.membersService.findById(updateIncomeDto.memberId as number);
-
-    //     if (!member) {
-    //         throw new ResourceNotFoundException('Member', updateIncomeDto.memberId);
-    //     }
-
-    //     // valida la existencia de tipo de ingreso
-    //     const incomeType = await this.incomeTypesService.findById(updateIncomeDto.incomeTypeId as number);
-
-    //     if (!incomeType) {
-    //         throw new ResourceNotFoundException('Income Type', updateIncomeDto.incomeTypeId);
-    //     }
-    //     // valida la existencia de metodo de pago
-    //     const paymentMethod = await this.paymentMethodsService.findById(updateIncomeDto.paymentMethodId as number);
-
-    //     if (!paymentMethod) {
-    //         throw new ResourceNotFoundException('Payment Method', updateIncomeDto.paymentMethodId);
-    //     }
-
-    //     // valida la existencia de voucher, en caso que exista lo reemplaza
-    //     if (voucher) {
-    //         console.log('si hay voucher en editar');
-    //         const storedFile = await this.storageService.upload(voucher, StorageFolder.INCOMES);
-    //         console.log('id file editar nuevo', storedFile);
-    //         updateIncomeDto.voucherFileId = storedFile.id;
-    //     }
-    //     const updatedIncome = await this.incomesRepository.update(id, updateIncomeDto);
-    //     return IncomeMapper.toDomain(updatedIncome);
-    // }
 
     async softDelete(id: Income['id']) {
         const income = await this.findById(id);

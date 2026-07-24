@@ -13,6 +13,7 @@ import { UpdateMemberDto } from '../dto/update-member.dto';
 import { MinistryEntity } from 'src/modules/ministries/entities/ministry.entity';
 import { PositionEntity } from 'src/modules/positions/entities/position.entity';
 import { ResourceNotFoundException } from 'src/common/exceptions/not-found-exception';
+import { ExportMemberCriteriaDto } from '../dto/export-member-criteria.dto';
 
 @Injectable()
 export class MemberRepository implements MemberRepositoryImpl {
@@ -74,11 +75,13 @@ export class MemberRepository implements MemberRepositoryImpl {
             }
 
             if (criteria.startDate && criteria.endDate) {
-                console.log('criteria', criteria.startDate, criteria.endDate);
+                // Formateamos inicio a las 00:00:00 y fin a las 23:59:59
+                const start = `${criteria.startDate} 00:00:00`;
+                const end = `${criteria.endDate} 23:59:59.999`;
 
-                qb.andWhere('member.created_at BETWEEN :startDate AND :endDate', {
-                    startDate: criteria.startDate,
-                    endDate: criteria.endDate,
+                qb.andWhere('member.created_at BETWEEN :start AND :end', {
+                    start,
+                    end,
                 });
             }
 
@@ -219,5 +222,54 @@ export class MemberRepository implements MemberRepositoryImpl {
     }
     async count(): Promise<number> {
         return this.memberRepository.count();
+    }
+
+    async exportByCriteria(criteria: ExportMemberCriteriaDto): Promise<MemberEntity[]> {
+        try {
+            const qb = this.memberRepository
+                .createQueryBuilder('member')
+                .leftJoinAndSelect('member.location', 'location')
+                .leftJoinAndSelect('member.ministries', 'ministries')
+                .leftJoinAndSelect('member.position', 'position');
+
+            if (criteria.name) {
+                qb.andWhere('member.name LIKE :name', { name: `%${criteria.name}%` });
+            }
+
+            if (criteria.status) {
+                Query.applyStatusFilter(qb, 'member', criteria.status);
+            }
+
+            if (criteria.ministryId) {
+                qb.andWhere('ministries.id = :ministryId', { ministryId: criteria.ministryId });
+            }
+
+            if (criteria.startDate && criteria.endDate) {
+                // Formateamos inicio a las 00:00:00 y fin a las 23:59:59
+                const start = `${criteria.startDate} 00:00:00`;
+                const end = `${criteria.endDate} 23:59:59.999`;
+
+                qb.andWhere('member.created_at BETWEEN :start AND :end', {
+                    start,
+                    end,
+                });
+            }
+
+            // Filtro por Cargo
+            if (criteria.positionId) {
+                qb.andWhere('member.position_id = :positionId', { positionId: criteria.positionId });
+            }
+
+            // Filtro por Mes de Cumpleaños
+            if (criteria.birthMonth) {
+                qb.andWhere('MONTH(member.birth_date) = :birthMonth', { birthMonth: criteria.birthMonth });
+            }
+
+            Query.sortCriteria(qb, `member.${criteria.sortField}`, criteria.sortDirection);
+
+            return await qb.getMany();
+        } catch (error) {
+            throw new CriticalInternalError(error as string);
+        }
     }
 }

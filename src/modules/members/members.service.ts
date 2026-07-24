@@ -6,10 +6,16 @@ import { FindMemberByCriteriaDto } from './dto/find-member-by-criteria';
 import { DuplicateException } from '../../common/exceptions/duplicate-exception';
 import { MemberMapper } from './mappers/member.mapper';
 import { Member } from './models/member.model';
+import { Response } from 'express';
+import { ExportMemberCriteriaDto } from './dto/export-member-criteria.dto';
+import { MemberExcelService } from './services/member-excel.service';
 
 @Injectable()
 export class MembersService {
-    constructor(private readonly memberRepository: MemberRepositoryImpl) {}
+    constructor(
+        private readonly memberRepository: MemberRepositoryImpl,
+        private readonly memberExcelService: MemberExcelService,
+    ) {}
 
     async findById(id: Member['id']) {
         const entity = await this.memberRepository.findById(id);
@@ -54,5 +60,12 @@ export class MembersService {
 
     async count(): Promise<number> {
         return this.memberRepository.count();
+    }
+
+    async export(criteria: ExportMemberCriteriaDto, res: Response): Promise<void> {
+        const entities = await this.memberRepository.exportByCriteria(criteria);
+        const incomes = entities.map((entity) => MemberMapper.toDomain(entity));
+
+        await this.memberExcelService.generateExcelResponse(incomes, criteria, res);
     }
 }
