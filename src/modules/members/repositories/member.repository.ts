@@ -68,6 +68,30 @@ export class MemberRepository implements MemberRepositoryImpl {
             if (criteria.status) {
                 Query.applyStatusFilter(qb, 'member', criteria.status);
             }
+
+            if (criteria.ministryId) {
+                qb.andWhere('ministries.id = :ministryId', { ministryId: criteria.ministryId });
+            }
+
+            if (criteria.startDate && criteria.endDate) {
+                console.log('criteria', criteria.startDate, criteria.endDate);
+
+                qb.andWhere('member.created_at BETWEEN :startDate AND :endDate', {
+                    startDate: criteria.startDate,
+                    endDate: criteria.endDate,
+                });
+            }
+
+            // Filtro por Cargo
+            if (criteria.positionId) {
+                qb.andWhere('member.position_id = :positionId', { positionId: criteria.positionId });
+            }
+
+            // Filtro por Mes de Cumpleaños
+            if (criteria.birthMonth) {
+                qb.andWhere('MONTH(member.birth_date) = :birthMonth', { birthMonth: criteria.birthMonth });
+            }
+
             Query.sortCriteria(qb, `member.${criteria.sortField}`, criteria.sortDirection);
 
             return Query.fetchPaged(qb, criteria.page, criteria.size);
