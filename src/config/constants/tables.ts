@@ -10,6 +10,8 @@ export enum Tables {
     incomeType = 'income_types',
     paymentMethod = 'payment_methods',
     files = 'files',
+    expenses = 'expenses',
+    expenseType = 'expense_types',
     // otros sin uso
     biometricDevices = 'biometric_devices',
     departments = 'departments',

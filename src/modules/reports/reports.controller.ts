@@ -4,6 +4,7 @@ import { ReportsService } from './reports.service';
 import { IncomeReportFilterDto } from './dto/income-report-filter.dto';
 import { RequireAuth } from 'src/common/decorators/require-auth';
 import { IncomeRankingFilterDto } from './dto/income-report-ranking-filter.dto';
+import { ExpenseReportFilterDto } from './dto/expense-report-filter.dto';
 
 @Controller('reports')
 export class ReportsController {
@@ -49,5 +50,42 @@ export class ReportsController {
     @Get('incomes/by-member-paginated')
     async incomeByMemberPaginated(@Query() criteria: IncomeRankingFilterDto) {
         return this.reportsService.incomeByMemberPaginated(criteria);
+    }
+
+    // CONTROLADORES DE EGRESOS
+
+    @RequireAuth()
+    @HttpCode(HttpStatus.OK)
+    @Get('expenses/summary')
+    async expenseSummary(@Query() filters: ExpenseReportFilterDto) {
+        return this.reportsService.expenseSummary(filters);
+    }
+
+    @RequireAuth()
+    @HttpCode(HttpStatus.OK)
+    @Get('expenses/monthly')
+    async expenseMonthly(@Query() filters: ExpenseReportFilterDto) {
+        return this.reportsService.expenseMonthly(filters);
+    }
+
+    @RequireAuth()
+    @HttpCode(HttpStatus.OK)
+    @Get('expenses/by-type')
+    async expenseByType(@Query() filters: ExpenseReportFilterDto) {
+        return this.reportsService.expenseByType(filters);
+    }
+
+    @RequireAuth()
+    @HttpCode(HttpStatus.OK)
+    @Get('expenses/by-payment-method')
+    async expenseByPaymentMethod(@Query() filters: ExpenseReportFilterDto) {
+        return this.reportsService.expenseByPaymentMethod(filters);
+    }
+
+    @RequireAuth()
+    @HttpCode(HttpStatus.OK)
+    @Get('expenses/by-supplier')
+    async expenseBySupplier(@Query() filters: ExpenseReportFilterDto) {
+        return this.reportsService.expenseBySupplier(filters);
     }
 }

@@ -8,7 +8,7 @@ import { IncomeTypeMapper } from './mappers/income-type.mapper';
 import { ResourceNotFoundException } from '../../common/exceptions/not-found-exception';
 import { RequireAuth } from '../../common/decorators/require-auth';
 
-@Controller('incomeTypes')
+@Controller('income-types')
 export class IncomeTypesController {
     constructor(private readonly incomeTypesService: IncomeTypesService) {}
 

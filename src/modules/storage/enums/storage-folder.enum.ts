@@ -3,6 +3,8 @@ export enum StorageFolder {
 
     INCOMES = 'incomes',
 
+    EXPENSES = 'expenses',
+
     REPORTS = 'reports',
 
     EVENTS = 'events',

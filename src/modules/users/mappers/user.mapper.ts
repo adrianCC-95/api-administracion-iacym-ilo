@@ -15,7 +15,10 @@ export class UserMapper {
         user.name = entity.name;
         user.password = entity.password;
         user.username = entity.username;
-        user.role = RoleMapper.toDomain(entity.role);
+
+        if (entity.role) {
+            user.role = RoleMapper.toDomain(entity.role);
+        }
         user.location = entity.location ? LocationMapper.toDomain(entity.location) : null;
         user.createdAt = entity.createdAt;
         user.updatedAt = entity.updatedAt;

@@ -1,3 +1,4 @@
+import { ExpensesModule } from './expenses/expenses.module';
 import { Module } from '@nestjs/common';
 
 import { LocationsModule } from './locations/locations.module';
@@ -17,6 +18,7 @@ import { IncomeTypesModule } from './income-types/income-types.module';
 import { IncomesModule } from './incomes/incomes.module';
 import { ReportsModule } from './reports/reports.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ExpenseTypesModule } from './expense-types/expense-types.module';
 
 @Module({
     imports: [
@@ -35,6 +37,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
         IncomesModule,
         ReportsModule,
         DashboardModule,
+        ExpenseTypesModule,
+        ExpensesModule,
     ],
 })
 export class RootModule {}
