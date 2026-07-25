@@ -120,4 +120,8 @@ export class UserRepository implements UserRepositoryImpl {
             throw new InternalServerErrorException(error);
         }
     }
+
+    async count(): Promise<number> {
+        return this.usersRepository.count();
+    }
 }

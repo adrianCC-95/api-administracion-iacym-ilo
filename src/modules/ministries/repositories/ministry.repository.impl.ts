@@ -13,4 +13,5 @@ export abstract class MinistryRepositoryImpl {
     abstract update(id: Ministry['id'], updateMinistryDto: UpdateMinistryDto): Promise<MinistryEntity>;
     abstract softDelete(id: Ministry['id']): Promise<void>;
     abstract restore(id: Ministry['id']): Promise<void>;
+    abstract count(): Promise<number>;
 }

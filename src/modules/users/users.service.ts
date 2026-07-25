@@ -82,4 +82,8 @@ export class UsersService {
     async restore(id: number) {
         return await this.usersRepository.restore(id);
     }
+
+    async count(): Promise<number> {
+        return this.usersRepository.count();
+    }
 }

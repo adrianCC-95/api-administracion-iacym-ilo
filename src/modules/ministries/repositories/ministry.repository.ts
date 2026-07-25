@@ -88,4 +88,8 @@ export class MinistryRepository implements MinistryRepositoryImpl {
             throw new CriticalInternalError(error as string);
         }
     }
+
+    async count(): Promise<number> {
+        return this.ministryRepository.count();
+    }
 }

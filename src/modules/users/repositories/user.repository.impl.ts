@@ -13,4 +13,5 @@ export abstract class UserRepositoryImpl {
     abstract update(id: User['id'], updateUserDto: UpdateUserDto): Promise<UserEntity>;
     abstract softDelete(id: User['id']): Promise<void>;
     abstract restore(id: User['id']): Promise<void>;
+    abstract count(): Promise<number>;
 }

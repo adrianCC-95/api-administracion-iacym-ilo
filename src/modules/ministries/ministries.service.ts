@@ -46,4 +46,8 @@ export class MinistriesService {
     async restore(id: Ministry['id']) {
         return await this.ministryRepository.restore(id);
     }
+
+    async count(): Promise<number> {
+        return await this.ministryRepository.count();
+    }
 }
