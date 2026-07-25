@@ -11,14 +11,19 @@ export class Query {
         const offset = (page - 1) * size;
 
         const countQuery = qb.clone();
-        const dataQuery = qb.offset(offset).limit(size);
+
+        const dataQuery = qb.skip(offset).take(size);
 
         const total = await countQuery.getCount();
+
         const data = await dataQuery.getMany();
 
         const pageInfo = PaginationBuilder.pageInfo(total, page, size);
 
-        return { pageInfo, items: data };
+        return {
+            pageInfo,
+            items: data,
+        };
     }
 
     static sortCriteria<Entity extends {}>(qb: SelectQueryBuilder<Entity>, field?: string, direction?: SortDirection) {
