@@ -55,7 +55,6 @@ export const NumberValidation = {
     optional: (key: string): number | undefined => {
         const value = getEnv(key);
         if (typeof value !== 'string') {
-            //console.log(`[ENV]: Variable ${key} (OPTIONAL) is not defined`);
             return undefined;
         }
 

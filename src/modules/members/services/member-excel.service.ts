@@ -10,17 +10,10 @@ export class MemberExcelService {
         const workbook = new Workbook.Workbook();
         const worksheet = workbook.addWorksheet('Reporte de Miembros de la Iglesia');
 
-        // Mostrar líneas de cuadrícula
-        worksheet.views = [{ showGridLines: true }];
-
-        // Paleta de colores y estilos
         const NAVY_COLOR = '1F4E78';
         const LIGHT_BLUE_FILL = 'E6EEF8';
         const GRAY_BORDER = 'D9D9D9';
 
-        // ----------------------------------------------------
-        // 1. TÍTULO DINÁMICO SEGÚN RANGO DE FECHAS
-        // ----------------------------------------------------
         const dateFromStr = criteria.startDate ? new Date(criteria.startDate).toLocaleDateString('es-ES') : null;
         const dateToStr = criteria.endDate ? new Date(criteria.endDate).toLocaleDateString('es-ES') : null;
 
@@ -44,9 +37,6 @@ export class MemberExcelService {
         worksheet.getCell('A2').font = { name: 'Calibri', size: 10, italic: true, color: { argb: '595959' } };
         worksheet.getRow(2).height = 18;
 
-        // ----------------------------------------------------
-        // 2. CONFIGURACIÓN DE ENCABEZADOS Y COLUMNAS
-        // ----------------------------------------------------
         const headers = [
             { header: 'ID', key: 'id', width: 10, align: 'center' },
             { header: 'Miembro', key: 'memberName', width: 30, align: 'left' },
@@ -77,9 +67,6 @@ export class MemberExcelService {
             worksheet.getColumn(colNumber).width = h.width;
         });
 
-        // ----------------------------------------------------
-        // 3. INSERCIÓN DE DATOS
-        // ----------------------------------------------------
         const startRowData = 5;
 
         incomes.forEach((member, index) => {
@@ -111,9 +98,6 @@ export class MemberExcelService {
             });
         });
 
-        // ----------------------------------------------------
-        // 5. DESCARGA DEL ARCHIVO
-        // ----------------------------------------------------
         const fileName = `Reporte_Miembros_${new Date().toISOString().slice(0, 10)}.xlsx`;
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);

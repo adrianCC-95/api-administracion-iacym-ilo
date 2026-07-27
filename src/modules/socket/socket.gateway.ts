@@ -10,20 +10,16 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private clients = new Map<string, Socket>();
 
     handleConnection(client: Socket) {
-        //console.log(`🔌 Client connected: ${client.id}`);
         this.clients.set(client.id, client);
 
-        // Listen for when client tells us its device id
         client.on('joinDevice', async (biometricDeviceId: string) => {
             if (biometricDeviceId) {
-                //console.log(`📦 Client ${client.id} joined device room: ${biometricDeviceId}`);
                 await client.join(biometricDeviceId);
             }
         });
     }
 
     handleDisconnect(client: Socket) {
-        //console.log(`❌ Client disconnected: ${client.id}`);
         this.clients.delete(client.id);
     }
 
@@ -43,33 +39,28 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
             const socket = this.server.sockets.sockets.get(socketId);
             if (!socket) throw new Error(`Socket not found for device ${biometricDeviceId}`);
 
-            // Generar un ID único de correlación
             const requestId = `${biometricDeviceId}-${Date.now()}`;
             const responseEvent = `${event}_RESPONSE_${requestId}`;
 
-            // 🕒 Crear un temporizador de seguridad
-            const timeoutMs = 20_000; // 10 segundos
+            const timeoutMs = 20_000;
             const timer = setTimeout(() => {
-                socket.off(responseEvent, handler); // 🧹 Limpia el listener si vence el tiempo
+                socket.off(responseEvent, handler);
                 throw new Error(
                     `No response from device ${biometricDeviceId}, : Hubo un problema con la conexion del biometrico,tiempo de espera agotado y/o no responde a lo soclicitado!`,
                 );
             }, timeoutMs);
 
-            // 🧠 Manejador de respuesta
             const handler = (data: any) => {
-                clearTimeout(timer); // 🔁 Cancela el timeout
-                socket.off(responseEvent, handler); // 🧹 Limpia el listener
-                resolve(data); // ✅ Devuelve la respuesta
+                clearTimeout(timer);
+                socket.off(responseEvent, handler);
+                resolve(data);
             };
 
-            // 🔁 Escuchar solo una vez la respuesta con ese requestId
             socket.once(responseEvent, (data) => {
-                clearTimeout(timer); // 🔁 Cancela el timeout
+                clearTimeout(timer);
                 resolve(data);
             });
 
-            // Emitir al cliente el evento original con el requestId
             socket.emit(event, { ...payload, requestId });
         });
     }

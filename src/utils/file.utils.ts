@@ -1,4 +1,3 @@
-// src/utils/file-utils.ts
 import { extname } from 'path';
 
 /**

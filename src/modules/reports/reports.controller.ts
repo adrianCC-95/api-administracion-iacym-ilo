@@ -21,7 +21,6 @@ export class ReportsController {
     @HttpCode(HttpStatus.OK)
     @Get('incomes/monthly')
     async incomeMonthly(@Query() filters: IncomeReportFilterDto) {
-        console.log('filtros desde controlador', filters);
         return this.reportsService.incomeMonthly(filters);
     }
 
@@ -36,7 +35,6 @@ export class ReportsController {
     @HttpCode(HttpStatus.OK)
     @Get('incomes/by-payment-method')
     async incomeByPaymentMethod(@Query() filters: IncomeReportFilterDto) {
-        console.log('filtros desde controlador', filters);
         return this.reportsService.incomeByPaymentMethod(filters);
     }
 

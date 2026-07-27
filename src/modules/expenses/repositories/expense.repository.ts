@@ -88,7 +88,6 @@ export class ExpenseRepository implements ExpenseRepositoryImpl {
 
     async create(createExpenseDto: CreateExpenseDto, userId: number): Promise<ExpenseEntity> {
         try {
-            // Suma automática del monto total general
             const totalAmount = createExpenseDto.details.reduce((acc, curr) => acc + Number(curr.amount), 0);
 
             const detailsEntities = createExpenseDto.details.map((d) => {
@@ -123,7 +122,6 @@ export class ExpenseRepository implements ExpenseRepositoryImpl {
     }
 
     async update(id: Expense['id'], updateExpenseDto: UpdateExpenseDto): Promise<ExpenseEntity> {
-        // Implementación similar respetando la transacción cabecera-detalle
         return (await this.findById(id)) as ExpenseEntity;
     }
 

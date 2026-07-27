@@ -75,7 +75,6 @@ export class MemberRepository implements MemberRepositoryImpl {
             }
 
             if (criteria.startDate && criteria.endDate) {
-                // Formateamos inicio a las 00:00:00 y fin a las 23:59:59
                 const start = `${criteria.startDate} 00:00:00`;
                 const end = `${criteria.endDate} 23:59:59.999`;
 
@@ -85,12 +84,10 @@ export class MemberRepository implements MemberRepositoryImpl {
                 });
             }
 
-            // Filtro por Cargo
             if (criteria.positionId) {
                 qb.andWhere('member.position_id = :positionId', { positionId: criteria.positionId });
             }
 
-            // Filtro por Mes de Cumpleaños
             if (criteria.birthMonth) {
                 qb.andWhere('MONTH(member.birth_date) = :birthMonth', { birthMonth: criteria.birthMonth });
             }
@@ -245,7 +242,6 @@ export class MemberRepository implements MemberRepositoryImpl {
             }
 
             if (criteria.startDate && criteria.endDate) {
-                // Formateamos inicio a las 00:00:00 y fin a las 23:59:59
                 const start = `${criteria.startDate} 00:00:00`;
                 const end = `${criteria.endDate} 23:59:59.999`;
 
@@ -255,12 +251,10 @@ export class MemberRepository implements MemberRepositoryImpl {
                 });
             }
 
-            // Filtro por Cargo
             if (criteria.positionId) {
                 qb.andWhere('member.position_id = :positionId', { positionId: criteria.positionId });
             }
 
-            // Filtro por Mes de Cumpleaños
             if (criteria.birthMonth) {
                 qb.andWhere('MONTH(member.birth_date) = :birthMonth', { birthMonth: criteria.birthMonth });
             }

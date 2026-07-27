@@ -10,17 +10,12 @@ export class IncomeExcelService {
         const workbook = new Workbook.Workbook();
         const worksheet = workbook.addWorksheet('Reporte de Ingresos');
 
-        // Mostrar líneas de cuadrícula
         worksheet.views = [{ showGridLines: true }];
 
-        // Paleta de colores y estilos
         const NAVY_COLOR = '1F4E78';
         const LIGHT_BLUE_FILL = 'E6EEF8';
         const GRAY_BORDER = 'D9D9D9';
 
-        // ----------------------------------------------------
-        // 1. TÍTULO DINÁMICO SEGÚN RANGO DE FECHAS
-        // ----------------------------------------------------
         const dateFromStr = criteria.dateFrom ? new Date(criteria.dateFrom).toLocaleDateString('es-ES') : null;
         const dateToStr = criteria.dateTo ? new Date(criteria.dateTo).toLocaleDateString('es-ES') : null;
 
@@ -44,9 +39,6 @@ export class IncomeExcelService {
         worksheet.getCell('A2').font = { name: 'Calibri', size: 10, italic: true, color: { argb: '595959' } };
         worksheet.getRow(2).height = 18;
 
-        // ----------------------------------------------------
-        // 2. CONFIGURACIÓN DE ENCABEZADOS Y COLUMNAS
-        // ----------------------------------------------------
         const headers = [
             { header: 'ID', key: 'id', width: 10, align: 'center' },
             { header: 'Fecha (Mes/Año)', key: 'incomeDate', width: 18, align: 'center' },
@@ -76,9 +68,6 @@ export class IncomeExcelService {
             worksheet.getColumn(colNumber).width = h.width;
         });
 
-        // ----------------------------------------------------
-        // 3. INSERCIÓN DE DATOS
-        // ----------------------------------------------------
         const startRowData = 5;
 
         incomes.forEach((income, index) => {
@@ -92,7 +81,6 @@ export class IncomeExcelService {
 
             const registeredByName = income.registeredBy ? income.registeredBy.name : 'N/A';
 
-            // Formatear la fecha a solo MES y AÑO (ej. 05/2026)
             let formattedMonthYear = '-';
             if (income.incomeDate) {
                 const d = new Date(income.incomeDate);
@@ -123,25 +111,19 @@ export class IncomeExcelService {
                 };
             });
 
-            // Formato de moneda para el Monto (Columna 6)
             row.getCell(6).numFmt = '"S/"#,##0.00;("S/"#,##0.00);"-"';
         });
 
-        // ----------------------------------------------------
-        // 4. FILA DE MONTO TOTAL GENERAL
-        // ----------------------------------------------------
         const totalRowIndex = startRowData + incomes.length;
         const totalRow = worksheet.getRow(totalRowIndex);
         totalRow.height = 24;
 
-        // Combinar celdas A hasta E para la etiqueta
         worksheet.mergeCells(totalRowIndex, 1, totalRowIndex, 5);
         const labelCell = totalRow.getCell(1);
         labelCell.value = 'TOTAL GENERAL';
         labelCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: NAVY_COLOR } };
         labelCell.alignment = { horizontal: 'right', vertical: 'middle' };
 
-        // Celda con Fórmula de Suma Excel para la Columna F (Monto)
         const totalAmountCell = totalRow.getCell(6);
         const lastDataRowIndex = totalRowIndex - 1;
         totalAmountCell.value = {
@@ -151,7 +133,6 @@ export class IncomeExcelService {
         totalAmountCell.alignment = { horizontal: 'right', vertical: 'middle' };
         totalAmountCell.numFmt = '"S/"#,##0.00;("S/"#,##0.00);"-"';
 
-        // Estilar la fila completa de Total (Fondo y Bordes Dobles)
         for (let col = 1; col <= 8; col++) {
             const cell = totalRow.getCell(col);
             cell.fill = {
@@ -167,9 +148,6 @@ export class IncomeExcelService {
             };
         }
 
-        // ----------------------------------------------------
-        // 5. DESCARGA DEL ARCHIVO
-        // ----------------------------------------------------
         const fileName = `Reporte_Ingresos_${new Date().toISOString().slice(0, 10)}.xlsx`;
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);

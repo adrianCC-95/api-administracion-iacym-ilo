@@ -39,33 +39,28 @@ export class IncomesService {
     }
 
     async create(createIncomeDto: CreateIncomeDto, voucher: Express.Multer.File | undefined, userId: number) {
-        // valida la existencia de miembro
         const member = await this.membersService.findById(createIncomeDto.memberId);
 
         if (!member) {
             throw new ResourceNotFoundException('Member', createIncomeDto.memberId);
         }
 
-        // valida la existencia de tipo de ingreso
         const incomeType = await this.incomeTypesService.findById(createIncomeDto.incomeTypeId);
 
         if (!incomeType) {
             throw new ResourceNotFoundException('Income Type', createIncomeDto.incomeTypeId);
         }
-        // valida la existencia de metodo de pago
+
         const paymentMethod = await this.paymentMethodsService.findById(createIncomeDto.paymentMethodId);
 
         if (!paymentMethod) {
             throw new ResourceNotFoundException('Payment Method', createIncomeDto.paymentMethodId);
         }
-        // valida la existencia de voucher
+
         let fileId: number | null = null;
 
         if (voucher) {
-            // Guarda el archivo físicamente
             const storedFile = await this.storageService.upload(voucher, StorageFolder.INCOMES);
-
-            // Guarda la metadata en la BD
 
             fileId = storedFile.id;
             createIncomeDto.voucherFileId = fileId;
@@ -82,7 +77,6 @@ export class IncomesService {
             throw new ResourceNotFoundException('Income', id);
         }
 
-        // validar member solo si viene
         if (updateIncomeDto.memberId !== undefined) {
             const member = await this.membersService.findById(updateIncomeDto.memberId);
 
@@ -91,7 +85,6 @@ export class IncomesService {
             }
         }
 
-        // validar incomeType solo si viene
         if (updateIncomeDto.incomeTypeId !== undefined) {
             const incomeType = await this.incomeTypesService.findById(updateIncomeDto.incomeTypeId);
 
@@ -100,7 +93,6 @@ export class IncomesService {
             }
         }
 
-        // validar paymentMethod solo si viene
         if (updateIncomeDto.paymentMethodId !== undefined) {
             const paymentMethod = await this.paymentMethodsService.findById(updateIncomeDto.paymentMethodId);
 
@@ -109,7 +101,6 @@ export class IncomesService {
             }
         }
 
-        // nuevo voucher
         if (voucher) {
             const storedFile = await this.storageService.upload(voucher, StorageFolder.INCOMES);
 
@@ -148,15 +139,12 @@ export class IncomesService {
 
         const voucherFile = income.voucherFile;
 
-        // 1. eliminar income
         await this.incomesRepository.delete(id);
 
-        // 2. eliminar metadata
         if (voucherFile) {
             await this.filesService.delete(voucherFile.id);
         }
 
-        // 3. eliminar archivo físico
         if (voucherFile) {
             await this.storageService.delete(voucherFile.path);
         }
@@ -173,31 +161,26 @@ export class IncomesService {
             throw new ResourceNotFoundException('Income', id);
         }
 
-        // Validar Member
         const member = await this.membersService.findByIdWithDeleted(income.member.id);
 
         if (!member) {
             throw new ResourceNotFoundException('Member', income.member.id);
         }
 
-        // Validar IncomeType
         const incomeType = await this.incomeTypesService.findByIdWithDeleted(income.incomeType.id);
 
         if (!incomeType) {
             throw new ResourceNotFoundException('Income Type', income.incomeType.id);
         }
 
-        // Validar PaymentMethod
         const paymentMethod = await this.paymentMethodsService.findByIdWithDeleted(income.paymentMethod.id);
 
         if (!paymentMethod) {
             throw new ResourceNotFoundException('Payment Method', income.paymentMethod.id);
         }
 
-        // Restaurar Income
         await this.incomesRepository.restore(id);
 
-        // Restaurar metadata del archivo
         if (income.voucherFile) {
             await this.filesService.restore(income.voucherFile.id);
         }

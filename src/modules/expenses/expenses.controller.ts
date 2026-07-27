@@ -58,7 +58,7 @@ export class ExpensesController {
     @RequireAuth()
     @HttpCode(HttpStatus.CREATED)
     @Post()
-    @UseInterceptors(FilesInterceptor('vouchers')) // Subida de múltiples boletas
+    @UseInterceptors(FilesInterceptor('vouchers'))
     async create(
         @CurrentUser() user: any,
         @UploadedFiles() vouchers: Express.Multer.File[] | undefined,

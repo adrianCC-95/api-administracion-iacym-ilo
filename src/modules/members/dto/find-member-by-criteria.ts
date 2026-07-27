@@ -36,5 +36,5 @@ export class FindMemberByCriteriaDto extends PaginationSortDto {
     @IsInt()
     @Min(1)
     @Max(12)
-    birthMonth?: number; // Representa el mes (1 = Enero, 12 = Diciembre)
+    birthMonth?: number;
 }

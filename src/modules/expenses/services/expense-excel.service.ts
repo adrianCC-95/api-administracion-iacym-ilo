@@ -15,7 +15,6 @@ export class ExpenseExcelService {
             views: [{ showGridLines: true }],
         });
 
-        // 1. Título Principal
         worksheet.mergeCells('A1:K1');
         const titleCell = worksheet.getCell('A1');
         titleCell.value = 'REPORTES DE EGRESOS Y GASTOS';
@@ -23,12 +22,11 @@ export class ExpenseExcelService {
         titleCell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: '1B365D' }, // Navy Blue Institucional
+            fgColor: { argb: '1B365D' },
         };
         titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
         worksheet.getRow(1).height = 40;
 
-        // 2. Metadata / Filtros Aplicados
         worksheet.getCell('A3').value = 'Fecha de Generación:';
         worksheet.getCell('A3').font = { bold: true, size: 10 };
         worksheet.getCell('B3').value = new Date().toLocaleString();
@@ -43,7 +41,6 @@ export class ExpenseExcelService {
             worksheet.getCell('B4').font = { size: 10 };
         }
 
-        // 3. Cabeceras de la Tabla (Desglosado a Nivel de Detalle)
         const headers = [
             'ID',
             'Título del Egreso',
@@ -67,7 +64,7 @@ export class ExpenseExcelService {
             cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: '2C4D75' }, // Navy Slate
+                fgColor: { argb: '2C4D75' },
             };
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
             cell.border = {
@@ -78,7 +75,6 @@ export class ExpenseExcelService {
             };
         });
 
-        // 4. Llenado de Datos (Aplanar Cabecera-Detalle para reporte analítico)
         let currentRow = 7;
 
         expenses.forEach((expense) => {
@@ -100,7 +96,7 @@ export class ExpenseExcelService {
                     ];
 
                     // Formato de Celda
-                    row.getCell(11).numFmt = '"S/"#,##0.00'; // Formato moneda Perú
+                    row.getCell(11).numFmt = '"S/"#,##0.00';
 
                     row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
                         cell.font = { name: 'Calibri', size: 10 };
@@ -126,7 +122,6 @@ export class ExpenseExcelService {
             }
         });
 
-        // 5. Fila de Totales
         const totalRow = worksheet.getRow(currentRow);
         worksheet.mergeCells(`A${currentRow}:J${currentRow}`);
         const totalLabelCell = worksheet.getCell(`A${currentRow}`);
@@ -150,25 +145,20 @@ export class ExpenseExcelService {
             };
         });
 
-        // 6. Auto-ajuste de ancho de columnas
         worksheet.columns.forEach((column) => {
             let maxLen = 10;
             column.eachCell?.({ includeEmpty: false }, (cell, rowNumber) => {
-                // Ignoramos la fila 1 (Título general) para que no infle el ancho de la columna A
                 if (rowNumber === 1) return;
 
                 const len = cell.value ? cell.value.toString().length : 0;
                 if (len > maxLen) maxLen = len;
 
-                // Opcional: Activar ajuste de texto para celdas con contenido largo
                 cell.alignment = { ...cell.alignment, wrapText: true };
             });
 
-            // Bajamos el tope máximo de 40 a 22
             column.width = Math.min(maxLen + 2, 22);
         });
 
-        // 7. Salida en Response HTTP
         const fileName = `Reporte_Egresos_${new Date().toISOString().split('T')[0]}.xlsx`;
 
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

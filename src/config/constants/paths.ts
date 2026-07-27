@@ -1,4 +1,3 @@
-// src/config/paths.ts
 import { join } from 'path';
 import { cwd } from 'process';
 

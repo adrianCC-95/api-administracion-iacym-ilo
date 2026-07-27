@@ -49,7 +49,6 @@ export class ReportsRepository implements ReportsRepositoryImpl {
     }
 
     private applyFilters(qb: SelectQueryBuilder<IncomeEntity>, filters: IncomeReportFilterDto) {
-        console.log('fechas', filters.startDate, filters.endDate);
         if (filters.startDate) {
             qb.andWhere('income.incomeDate >= :startDate', {
                 startDate: filters.startDate,
@@ -165,7 +164,6 @@ export class ReportsRepository implements ReportsRepositoryImpl {
     }
 
     async incomeByPaymentMethod(filters: IncomeReportFilterDto): Promise<IncomeByPaymentMethodResponse[]> {
-        console.log('filtros desde repositorio', filters);
         const qb = this.repository
             .createQueryBuilder('income')
             .leftJoin('income.member', 'member')
@@ -174,7 +172,6 @@ export class ReportsRepository implements ReportsRepositoryImpl {
             .leftJoin('income.registeredBy', 'registeredBy');
 
         this.applyFilters(qb, filters);
-        console.log('filtros', qb);
 
         const rows = await qb
             .select('paymentMethod.id', 'paymentMethodId')
@@ -204,8 +201,6 @@ export class ReportsRepository implements ReportsRepositoryImpl {
             .leftJoin('income.incomeType', 'incomeType')
             .leftJoin('income.paymentMethod', 'paymentMethod')
             .leftJoin('income.registeredBy', 'registeredBy');
-
-        console.log('filtros desde repositorio', qb.getOne());
 
         this.applyFilters(qb, filters);
 
@@ -282,8 +277,6 @@ export class ReportsRepository implements ReportsRepositoryImpl {
     }
 
     // REPORTES DE GASTOS
-
-    // Métodos a incluir dentro de ReportsRepository o ExpenseReportsRepository
 
     async expenseSummary(filters: ExpenseReportFilterDto) {
         const qb = this.expenseRepository.createQueryBuilder('expense').leftJoin('expense.details', 'details');

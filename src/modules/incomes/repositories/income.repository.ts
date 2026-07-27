@@ -311,7 +311,6 @@ export class IncomeRepository implements IncomeRepositoryImpl {
             const sortDirection = criteria.sortDirection || 'DESC';
             Query.sortCriteria(qb, `income.${sortField}`, sortDirection);
 
-            // Sin paginación: trae todos los registros que cumplen los filtros
             return await qb.getMany();
         } catch (error) {
             throw new CriticalInternalError(error as string);

@@ -7,7 +7,7 @@ import { StatusFilter } from 'src/types/pagination';
 export class FindExpenseByCriteriaDto extends PaginationSortDto {
     @IsOptional()
     @IsString()
-    search?: string; // Busca en título o proveedor/comprobante
+    search?: string;
 
     @IsOptional()
     @IsId()

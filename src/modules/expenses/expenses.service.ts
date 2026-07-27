@@ -41,17 +41,14 @@ export class ExpensesService {
     }
 
     async create(createExpenseDto: CreateExpenseDto, vouchers: Express.Multer.File[] | undefined, userId: number) {
-        // 1. Validar Sede
         const location = await this.locationsService.findById(createExpenseDto.locationId);
         if (!location) throw new ResourceNotFoundException('Location', createExpenseDto.locationId);
 
-        // 2. Validar Ministerio si aplica
         if (createExpenseDto.ministryId) {
             const ministry = await this.ministriesService.findById(createExpenseDto.ministryId);
             if (!ministry) throw new ResourceNotFoundException('Ministry', createExpenseDto.ministryId);
         }
 
-        // 3. Procesar subida de comprobantes si vienen adjuntos y mapearlos por índice
         if (vouchers && vouchers.length > 0) {
             for (let i = 0; i < createExpenseDto.details.length; i++) {
                 if (vouchers[i]) {
@@ -61,7 +58,6 @@ export class ExpensesService {
             }
         }
 
-        // 4. Validar Tipos de Egreso y Métodos de Pago de cada detalle
         for (const detail of createExpenseDto.details) {
             const expenseType = await this.expenseTypesService.findById(detail.expenseTypeId);
             if (!expenseType) throw new ResourceNotFoundException('Expense Type', detail.expenseTypeId);
@@ -88,7 +84,6 @@ export class ExpensesService {
 
         await this.expensesRepository.softDelete(id);
 
-        // Opcional: Soft delete de archivos adjuntos en los detalles
         if (expense.details) {
             for (const detail of expense.details) {
                 if (detail.voucherFile) {

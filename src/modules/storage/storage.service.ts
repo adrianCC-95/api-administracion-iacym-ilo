@@ -50,7 +50,6 @@ export class StorageService {
 
                 mimeType: file.mimetype,
 
-                // Ruta para guardar en BD
                 path: path.posix.join(relativeFolder, fileName),
 
                 storage: 'local',
@@ -63,7 +62,6 @@ export class StorageService {
             return savedFile;
         } catch (error) {
             console.log(error);
-
             throw error;
         }
     }

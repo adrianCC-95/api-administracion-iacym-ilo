@@ -27,7 +27,7 @@ export class CreateIncomeDto {
     @IsOptional()
     @Type(() => Number)
     @IsId()
-    voucherFileId?: number | null; // en actualizar es opcional tambien, en caso que exista se reemplaza
+    voucherFileId?: number | null;
 
     @IsOptional()
     @IsString()
