@@ -132,6 +132,29 @@ export class ReportsRepository implements ReportsRepositoryImpl {
         }));
     }
 
+    async incomeDaily(filters: IncomeReportFilterDto) {
+        const qb = this.repository
+            .createQueryBuilder('income')
+            .leftJoin('income.member', 'member')
+            .leftJoin('income.incomeType', 'incomeType')
+            .leftJoin('income.paymentMethod', 'paymentMethod')
+            .leftJoin('income.registeredBy', 'registeredBy');
+
+        this.applyFilters(qb, filters);
+
+        const rows = await qb
+            .select('DAY(income.incomeDate)', 'day')
+            .addSelect('SUM(income.amount)', 'total')
+            .groupBy('DAY(income.incomeDate)')
+            .orderBy('day', 'ASC')
+            .getRawMany();
+
+        return rows.map((row) => ({
+            day: Number(row.day),
+            total: Number(row.total || 0),
+        }));
+    }
+
     async incomeByType(filters: IncomeReportFilterDto): Promise<IncomeByTypeResponse[]> {
         const qb = this.repository
             .createQueryBuilder('income')
@@ -298,6 +321,23 @@ export class ReportsRepository implements ReportsRepositoryImpl {
         };
     }
 
+    async expenseDaily(filters: ExpenseReportFilterDto) {
+        const qb = this.expenseRepository.createQueryBuilder('expense').leftJoin('expense.details', 'details');
+
+        this.applyExpenseFilters(qb, filters);
+
+        const rows = await qb
+            .select('DAY(expense.expenseDate)', 'day')
+            .addSelect('SUM(details.amount)', 'total')
+            .groupBy('DAY(expense.expenseDate)')
+            .orderBy('day', 'ASC')
+            .getRawMany();
+
+        return rows.map((row) => ({
+            day: Number(row.day),
+            total: Number(row.total || 0),
+        }));
+    }
     async expenseMonthly(filters: ExpenseReportFilterDto) {
         const qb = this.expenseRepository.createQueryBuilder('expense').leftJoin('expense.details', 'details');
 

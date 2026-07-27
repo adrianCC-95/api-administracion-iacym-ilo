@@ -17,6 +17,10 @@ export class ReportsService {
         return this.reportsRepository.incomeMonthly(filters);
     }
 
+    async incomeDaily(filters: IncomeReportFilterDto) {
+        return this.reportsRepository.incomeDaily(filters);
+    }
+
     async incomeByType(filters: IncomeReportFilterDto) {
         return this.reportsRepository.incomeByType(filters);
     }
@@ -37,6 +41,10 @@ export class ReportsService {
     // SERVICIOS DE EGRESOS
     async expenseSummary(filters: ExpenseReportFilterDto) {
         return this.reportsRepository.expenseSummary(filters);
+    }
+
+    async expenseDaily(filters: ExpenseReportFilterDto) {
+        return this.reportsRepository.expenseDaily(filters);
     }
 
     async expenseMonthly(filters: ExpenseReportFilterDto) {

@@ -10,6 +10,7 @@ import { IncomeByMemberEntity } from '../entities/income-by-member.entity';
 
 export abstract class ReportsRepositoryImpl {
     abstract incomeSummary(filters: any): Promise<IncomeSummaryResponse>;
+    abstract incomeDaily({ startDate, endDate }: { startDate: string; endDate: string }): Promise<any>;
     abstract incomeMonthly(filters: IncomeReportFilterDto): Promise<IncomeMonthlyResponse[]>;
     abstract incomeByType(filters: IncomeReportFilterDto): Promise<IncomeByTypeResponse[]>;
     abstract incomeByPaymentMethod(filters: IncomeReportFilterDto): Promise<IncomeByPaymentMethodResponse[]>;

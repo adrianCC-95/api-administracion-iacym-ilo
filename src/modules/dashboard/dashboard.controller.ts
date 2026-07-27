@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
@@ -7,7 +7,7 @@ export class DashboardController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    getDashboard() {
+    getDashboard(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
         return this.dashboardService.getDashboard();
     }
 }
