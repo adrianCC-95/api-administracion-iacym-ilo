@@ -3,6 +3,7 @@ import { MembersService } from '../members/members.service';
 import { ReportsService } from '../reports/reports.service';
 import { MinistriesService } from '../ministries/ministries.service';
 import { UsersService } from '../users/users.service';
+import { GetDashboardQueryDto } from './dto/get-dashboard-query.dto';
 
 @Injectable()
 export class DashboardService {
@@ -13,8 +14,18 @@ export class DashboardService {
         private readonly ministriesService: MinistriesService,
     ) {}
 
-    async getDashboard() {
+    async getDashboard(queryDto: GetDashboardQueryDto) {
+        // 1. Rango dinámico: Mes actual por defecto (o el rango filtrado desde el frontend)
+        const startDate = queryDto.startDate ?? this.getDefaultStartDate();
+        const endDate = queryDto.endDate ?? this.getDefaultEndDate();
+        const dateRange = { startDate, endDate };
+
+        // 2. Rango fijo anual: Año actual completo (01 Ene - 31 Dic) para las gráficas mensuales
         const currentYear = new Date().getFullYear();
+        const yearRange = {
+            startDate: `${currentYear}-01-01`,
+            endDate: `${currentYear}-12-31`,
+        };
 
         const [
             incomeSummary,
@@ -29,53 +40,34 @@ export class DashboardService {
             expenseByType,
             expenseByPaymentMethod,
             incomeByPaymentMethod,
+            incomeDaily,
+            expenseDaily,
         ] = await Promise.all([
-            this.reportsService.incomeSummary({
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
-            }),
+            // --- Filtro del Mes Actual (o rango seleccionado) ---
+            this.reportsService.incomeSummary(dateRange),
+            this.reportsService.expenseSummary(dateRange),
 
-            this.reportsService.expenseSummary({
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
-            }),
+            // --- EXCEPCIÓN: Filtro del Año Completo ---
+            this.reportsService.expenseMonthly(yearRange),
+            this.reportsService.incomeMonthly(yearRange),
 
-            this.reportsService.expenseMonthly({
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
-            }),
-
-            this.reportsService.incomeMonthly({
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
-            }),
+            // --- Demás Filtros del Mes Actual ---
             this.reportsService.incomeByMemberPaginated({
                 page: 1,
                 size: 5,
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
+                ...dateRange,
                 sortField: 'total',
                 sortDirection: 'DESC',
             }),
             this.membersService.count(),
             this.ministriesService.count(),
             this.usersService.count(),
-            await this.reportsService.incomeByType({
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
-            }),
-            await this.reportsService.expenseByType({
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
-            }),
-            await this.reportsService.expenseByPaymentMethod({
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
-            }),
-            await this.reportsService.incomeByPaymentMethod({
-                startDate: `${currentYear}-01-01`,
-                endDate: `${currentYear}-12-31`,
-            }),
+            this.reportsService.incomeByType(dateRange),
+            this.reportsService.expenseByType(dateRange),
+            this.reportsService.expenseByPaymentMethod(dateRange),
+            this.reportsService.incomeByPaymentMethod(dateRange),
+            this.reportsService.incomeDaily(dateRange),
+            this.reportsService.expenseDaily(dateRange),
         ]);
 
         return {
@@ -98,6 +90,26 @@ export class DashboardService {
                 users: totalUsers,
                 members: totalMembers,
             },
+            incomeDaily,
+            expenseDaily,
         };
+    }
+
+    // Retorna el día 1 del mes actual (YYYY-MM-01)
+    private getDefaultStartDate(): string {
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        return `${year}-${month}-01`;
+    }
+
+    // Retorna el último día del mes actual (ej: YYYY-MM-30 / 31)
+    private getDefaultEndDate(): string {
+        const date = new Date();
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        const year = lastDay.getFullYear();
+        const month = String(lastDay.getMonth() + 1).padStart(2, '0');
+        const day = String(lastDay.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 }

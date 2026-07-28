@@ -107,7 +107,7 @@ export class ReportsRepository implements ReportsRepositoryImpl {
             .addOrderBy('month', 'ASC')
             .getRawMany();
 
-        const months = [
+        const monthsNames = [
             '',
             'Enero',
             'Febrero',
@@ -123,16 +123,38 @@ export class ReportsRepository implements ReportsRepositoryImpl {
             'Diciembre',
         ];
 
-        return rows.map((row) => ({
-            year: Number(row.year),
-            month: Number(row.month),
-            monthName: months[Number(row.month)],
-            count: Number(row.count),
-            total: Number(row.total),
-        }));
+        // 1. Mapeamos las filas que devolvió SQL para búsqueda rápida O(1)
+        const dataMap = new Map<number, { count: number; total: number; year: number }>();
+        rows.forEach((row) => {
+            dataMap.set(Number(row.month), {
+                year: Number(row.year),
+                count: Number(row.count),
+                total: Number(row.total),
+            });
+        });
+
+        // Detectamos el año basado en el filtro enviado (o el actual si no viene)
+        const currentYear = filters.startDate ? new Date(filters.startDate).getFullYear() : new Date().getFullYear();
+
+        // 2. Generamos del mes 1 al 12 garantizados
+        const fullYearReport: IncomeMonthlyResponse[] = [];
+
+        for (let month = 1; month <= 12; month++) {
+            const item = dataMap.get(month);
+
+            fullYearReport.push({
+                year: item?.year || currentYear,
+                month: month,
+                monthName: monthsNames[month],
+                count: item ? item.count : 0,
+                total: item ? item.total : 0,
+            });
+        }
+
+        return fullYearReport;
     }
 
-    async incomeDaily(filters: IncomeReportFilterDto) {
+    async incomeDaily(filters: IncomeReportFilterDto): Promise<any[]> {
         const qb = this.repository
             .createQueryBuilder('income')
             .leftJoin('income.member', 'member')
@@ -149,10 +171,50 @@ export class ReportsRepository implements ReportsRepositoryImpl {
             .orderBy('day', 'ASC')
             .getRawMany();
 
-        return rows.map((row) => ({
-            day: Number(row.day),
-            total: Number(row.total || 0),
-        }));
+        // Map para búsqueda rápida O(1)
+        const incomeMap = new Map<number, number>(rows.map((row) => [Number(row.day), Number(row.total || 0)]));
+
+        // 1. Extraer componentes (Año, Mes, Día) sin que la zona horaria (UTC) nos cambie el día
+        const parseDateComponents = (dateInput?: string | Date) => {
+            if (!dateInput) return null;
+            const dateStr = dateInput.toString().split('T')[0]; // Toma 'YYYY-MM-DD'
+            const [year, month, day] = dateStr.split('-').map(Number);
+            return { year, month, day };
+        };
+
+        const startComp = parseDateComponents(filters.startDate);
+        const endComp = parseDateComponents(filters.endDate);
+
+        // 2. Determinar el día de inicio
+        const startDay = startComp?.day || 1;
+
+        // 3. Determinar el día de fin de forma DINÁMICA
+        let endDay: number;
+
+        if (endComp?.day) {
+            // Si el usuario especificó endDate (ej: hasta el 15), usamos ese día
+            endDay = endComp.day;
+        } else if (startComp?.year && startComp?.month) {
+            // Si NO envió endDate, calculamos los días TOTALES REALES de ese mes específico
+            // (el truco de poner día '0' en el mes siguiente devuelve el último día del mes actual)
+            endDay = new Date(startComp.year, startComp.month, 0).getDate();
+        } else {
+            // Fallback al mes actual
+            const now = new Date();
+            endDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        }
+
+        // 4. Generar la lista rellena
+        const fullDailyReport: { day: number; total: number }[] = [];
+
+        for (let day = startDay; day <= endDay; day++) {
+            fullDailyReport.push({
+                day,
+                total: incomeMap.get(day) || 0,
+            });
+        }
+
+        return fullDailyReport;
     }
 
     async incomeByType(filters: IncomeReportFilterDto): Promise<IncomeByTypeResponse[]> {
@@ -322,21 +384,54 @@ export class ReportsRepository implements ReportsRepositoryImpl {
     }
 
     async expenseDaily(filters: ExpenseReportFilterDto) {
-        const qb = this.expenseRepository.createQueryBuilder('expense').leftJoin('expense.details', 'details');
+        const qb = this.expenseRepository.createQueryBuilder('expense');
 
+        // applyFilters se encargará de hacer los joins necesarios si aplicas filtros por tipo, ubicación, etc.
         this.applyExpenseFilters(qb, filters);
 
         const rows = await qb
             .select('DAY(expense.expenseDate)', 'day')
-            .addSelect('SUM(details.amount)', 'total')
+            .addSelect('SUM(expense.totalAmount)', 'total')
             .groupBy('DAY(expense.expenseDate)')
             .orderBy('day', 'ASC')
             .getRawMany();
 
-        return rows.map((row) => ({
-            day: Number(row.day),
-            total: Number(row.total || 0),
-        }));
+        // Map para búsqueda rápida O(1)
+        const expenseMap = new Map<number, number>(rows.map((row) => [Number(row.day), Number(row.total || 0)]));
+
+        // Parser de fechas sin desfase UTC
+        const parseDateComponents = (dateInput?: string | Date) => {
+            if (!dateInput) return null;
+            const dateStr = dateInput.toString().split('T')[0];
+            const [year, month, day] = dateStr.split('-').map(Number);
+            return { year, month, day };
+        };
+
+        const startComp = parseDateComponents(filters.startDate);
+        const endComp = parseDateComponents(filters.endDate);
+
+        const startDay = startComp?.day || 1;
+        let endDay: number;
+
+        if (endComp?.day) {
+            endDay = endComp.day;
+        } else if (startComp?.year && startComp?.month) {
+            endDay = new Date(startComp.year, startComp.month, 0).getDate();
+        } else {
+            const now = new Date();
+            endDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        }
+
+        const fullDailyReport: { day: number; total: number }[] = [];
+
+        for (let day = startDay; day <= endDay; day++) {
+            fullDailyReport.push({
+                day,
+                total: expenseMap.get(day) || 0,
+            });
+        }
+
+        return fullDailyReport;
     }
     async expenseMonthly(filters: ExpenseReportFilterDto) {
         const qb = this.expenseRepository.createQueryBuilder('expense').leftJoin('expense.details', 'details');
@@ -354,7 +449,7 @@ export class ReportsRepository implements ReportsRepositoryImpl {
             .addOrderBy('month', 'ASC')
             .getRawMany();
 
-        const months = [
+        const monthsNames = [
             '',
             'Enero',
             'Febrero',
@@ -370,15 +465,31 @@ export class ReportsRepository implements ReportsRepositoryImpl {
             'Diciembre',
         ];
 
-        return rows.map((row) => ({
-            year: Number(row.year),
-            month: Number(row.month),
-            monthName: months[Number(row.month)],
-            count: Number(row.count),
-            total: Number(row.total),
-        }));
-    }
+        const dataMap = new Map<number, { count: number; total: number; year: number }>();
+        rows.forEach((row) => {
+            dataMap.set(Number(row.month), {
+                year: Number(row.year),
+                count: Number(row.count),
+                total: Number(row.total),
+            });
+        });
 
+        const currentYear = filters.startDate ? new Date(filters.startDate).getFullYear() : new Date().getFullYear();
+
+        // Generamos los 12 meses sin problemas de inferencia de tipo 'never'
+        return Array.from({ length: 12 }, (_, index) => {
+            const month = index + 1;
+            const item = dataMap.get(month);
+
+            return {
+                year: item?.year || currentYear,
+                month,
+                monthName: monthsNames[month],
+                count: item ? item.count : 0,
+                total: item ? item.total : 0,
+            };
+        });
+    }
     async expenseByType(filters: ExpenseReportFilterDto) {
         const qb = this.expenseRepository
             .createQueryBuilder('expense')
