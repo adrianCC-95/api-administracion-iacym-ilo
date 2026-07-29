@@ -15,12 +15,10 @@ export class DashboardService {
     ) {}
 
     async getDashboard(queryDto: GetDashboardQueryDto) {
-        // 1. Rango dinámico: Mes actual por defecto (o el rango filtrado desde el frontend)
         const startDate = queryDto.startDate ?? this.getDefaultStartDate();
         const endDate = queryDto.endDate ?? this.getDefaultEndDate();
         const dateRange = { startDate, endDate };
 
-        // 2. Rango fijo anual: Año actual completo (01 Ene - 31 Dic) para las gráficas mensuales
         const currentYear = new Date().getFullYear();
         const yearRange = {
             startDate: `${currentYear}-01-01`,
@@ -43,15 +41,12 @@ export class DashboardService {
             incomeDaily,
             expenseDaily,
         ] = await Promise.all([
-            // --- Filtro del Mes Actual (o rango seleccionado) ---
             this.reportsService.incomeSummary(dateRange),
             this.reportsService.expenseSummary(dateRange),
 
-            // --- EXCEPCIÓN: Filtro del Año Completo ---
             this.reportsService.expenseMonthly(yearRange),
             this.reportsService.incomeMonthly(yearRange),
 
-            // --- Demás Filtros del Mes Actual ---
             this.reportsService.incomeByMemberPaginated({
                 page: 1,
                 size: 5,
@@ -95,7 +90,6 @@ export class DashboardService {
         };
     }
 
-    // Retorna el día 1 del mes actual (YYYY-MM-01)
     private getDefaultStartDate(): string {
         const date = new Date();
         const year = date.getFullYear();
@@ -103,7 +97,6 @@ export class DashboardService {
         return `${year}-${month}-01`;
     }
 
-    // Retorna el último día del mes actual (ej: YYYY-MM-30 / 31)
     private getDefaultEndDate(): string {
         const date = new Date();
         const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);

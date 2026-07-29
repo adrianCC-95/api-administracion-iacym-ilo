@@ -8,7 +8,6 @@ export class DashboardController {
     @HttpCode(HttpStatus.OK)
     @Get()
     getDashboard(@Query() queryDto: GetDashboardQueryDto) {
-        // queryDto contiene { startDate, endDate } o un objeto vacío {} si no se enviaron
         return this.dashboardService.getDashboard(queryDto);
     }
 }
