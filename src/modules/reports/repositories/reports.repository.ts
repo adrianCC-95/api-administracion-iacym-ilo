@@ -50,15 +50,15 @@ export class ReportsRepository implements ReportsRepositoryImpl {
 
     private applyFilters(qb: SelectQueryBuilder<IncomeEntity>, filters: IncomeReportFilterDto) {
         if (filters.startDate) {
-            qb.andWhere('income.incomeDate >= :startDate', {
-                startDate: filters.startDate,
-            });
+            const startDate = filters.startDate.includes(' ') ? filters.startDate : `${filters.startDate} 00:00:00`;
+
+            qb.andWhere('income.incomeDate >= :startDate', { startDate });
         }
 
         if (filters.endDate) {
-            qb.andWhere('income.incomeDate <= :endDate', {
-                endDate: filters.endDate,
-            });
+            const endDate = filters.endDate.includes(' ') ? filters.endDate : `${filters.endDate} 23:59:59`;
+
+            qb.andWhere('income.incomeDate <= :endDate', { endDate });
         }
 
         if (filters.memberId) {
@@ -577,11 +577,15 @@ export class ReportsRepository implements ReportsRepositoryImpl {
 
     private applyExpenseFilters(qb: SelectQueryBuilder<ExpenseEntity>, filters: ExpenseReportFilterDto) {
         if (filters.startDate) {
-            qb.andWhere('expense.expenseDate >= :startDate', { startDate: filters.startDate });
+            const startDate = filters.startDate.includes(' ') ? filters.startDate : `${filters.startDate} 00:00:00`;
+
+            qb.andWhere('expense.expenseDate >= :startDate', { startDate });
         }
 
         if (filters.endDate) {
-            qb.andWhere('expense.expenseDate <= :endDate', { endDate: filters.endDate });
+            const endDate = filters.endDate.includes(' ') ? filters.endDate : `${filters.endDate} 23:59:59`;
+
+            qb.andWhere('expense.expenseDate <= :endDate', { endDate });
         }
 
         if (filters.locationId) {
