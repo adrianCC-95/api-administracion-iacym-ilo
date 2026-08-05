@@ -16,6 +16,8 @@ import { Query } from 'src/utils/query';
 import { IncomeByMemberEntity } from '../entities/income-by-member.entity';
 import { ExpenseReportFilterDto } from '../dto/expense-report-filter.dto';
 import { ExpenseEntity } from 'src/modules/expenses/entities/expense.entity';
+import { IncomeSheetFilterDto } from '../dto/income-sheet-filter.dto';
+import { IncomeSheetData, SummaryCategory, TitheItem } from '../entities/income-sheet-report.interface';
 
 @Injectable()
 export class ReportsRepository implements ReportsRepositoryImpl {
@@ -607,5 +609,70 @@ export class ReportsRepository implements ReportsRepositoryImpl {
         if (filters.registeredById) {
             qb.andWhere('expense.registeredBy.id = :registeredById', { registeredById: filters.registeredById });
         }
+    }
+
+    async getIncomeSheetData(filters: IncomeSheetFilterDto): Promise<IncomeSheetData> {
+        const startDate = `${filters.date} 00:00:00`;
+        const endDate = `${filters.date} 23:59:59`;
+
+        const incomes = await this.repository
+            .createQueryBuilder('income')
+            .leftJoinAndSelect('income.member', 'member')
+            .leftJoinAndSelect('income.incomeType', 'incomeType')
+            .where('income.incomeDate >= :startDate AND income.incomeDate <= :endDate', { startDate, endDate })
+            .orderBy('income.id', 'ASC')
+            .getMany();
+
+        const tithes: TitheItem[] = incomes.map((inc) => {
+            const name = inc.member?.name || '';
+
+            const lastName = (inc.member as any)?.lastName || (inc.member as any)?.last_name || '';
+            const fullName = `${name} ${lastName}`.trim();
+
+            return {
+                memberName: fullName || 'ANÓNIMO / GENERAL',
+                amount: Number(inc.amount || 0),
+            };
+        });
+
+        const totalsByCategoryMap = new Map<number, SummaryCategory>();
+        let grandTotal = 0;
+        let totalDiezmos = 0;
+
+        for (const inc of incomes) {
+            const amount = Number(inc.amount || 0);
+            grandTotal += amount;
+
+            if (inc.incomeType) {
+                const typeId = inc.incomeType.id;
+                const typeName = inc.incomeType.name;
+
+                if (typeName.toLowerCase().includes('diezmo')) {
+                    totalDiezmos += amount;
+                }
+
+                if (!totalsByCategoryMap.has(typeId)) {
+                    totalsByCategoryMap.set(typeId, {
+                        id: typeId,
+                        name: typeName,
+                        total: 0,
+                    });
+                }
+
+                totalsByCategoryMap.get(typeId)!.total += amount;
+            }
+        }
+
+        const categories: SummaryCategory[] = Array.from(totalsByCategoryMap.values());
+
+        return {
+            date: filters.date,
+            tithes,
+            summary: {
+                categories,
+                totalDiezmos,
+                grandTotal,
+            },
+        };
     }
 }

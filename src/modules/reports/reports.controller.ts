@@ -1,4 +1,7 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Query, Res } from '@nestjs/common';
+
+import { Response } from 'express';
+import { IncomeSheetFilterDto } from './dto/income-sheet-filter.dto';
 
 import { ReportsService } from './reports.service';
 import { IncomeReportFilterDto } from './dto/income-report-filter.dto';
@@ -85,5 +88,20 @@ export class ReportsController {
     @Get('expenses/by-supplier')
     async expenseBySupplier(@Query() filters: ExpenseReportFilterDto) {
         return this.reportsService.expenseBySupplier(filters);
+    }
+
+    @RequireAuth()
+    @HttpCode(HttpStatus.OK)
+    @Get('incomes/sheet-pdf')
+    async exportIncomeSheetPdf(@Query() filters: IncomeSheetFilterDto, @Res() res: Response) {
+        const pdfBuffer = await this.reportsService.generateIncomeSheetPdf(filters);
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `inline; filename=planilla_ingresos_${filters.date}.pdf`,
+            'Content-Length': pdfBuffer.length,
+        });
+
+        res.end(pdfBuffer);
     }
 }

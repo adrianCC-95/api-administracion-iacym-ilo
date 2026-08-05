@@ -5,9 +5,16 @@ import { IncomeRankingFilterDto } from './dto/income-report-ranking-filter.dto';
 import { IncomeReportMapper } from './mappers/income-report.mapper';
 import { ExpenseReportFilterDto } from './dto/expense-report-filter.dto';
 
+import { PdfPrinterService } from './services/pdf-printer.service';
+import { IncomeSheetPdfBuilder } from './services/income-sheet-pdf.builder';
+import { IncomeSheetFilterDto } from './dto/income-sheet-filter.dto';
+
 @Injectable()
 export class ReportsService {
-    constructor(private readonly reportsRepository: ReportsRepository) {}
+    constructor(
+        private readonly reportsRepository: ReportsRepository,
+        private readonly pdfPrinterService: PdfPrinterService,
+    ) {}
 
     async incomeSummary(filters: IncomeReportFilterDto) {
         return this.reportsRepository.incomeSummary(filters);
@@ -61,5 +68,13 @@ export class ReportsService {
 
     async expenseBySupplier(filters: ExpenseReportFilterDto) {
         return this.reportsRepository.expenseBySupplier(filters);
+    }
+
+    async generateIncomeSheetPdf(filters: IncomeSheetFilterDto): Promise<Buffer> {
+        const reportData = await this.reportsRepository.getIncomeSheetData(filters);
+
+        return this.pdfPrinterService.createPdfBuffer((doc) => {
+            IncomeSheetPdfBuilder.build(doc, reportData);
+        });
     }
 }
